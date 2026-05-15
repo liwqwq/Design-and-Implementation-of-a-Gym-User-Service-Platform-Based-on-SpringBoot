@@ -1,118 +1,118 @@
 # Gym User Service Platform
 
-Gym User Service Platform 是一个基于 **Spring Boot + Vue 3 + MySQL** 的健身房用户服务平台。项目包含 **用户端、教练端、管理员端** 三套界面，围绕课程预约、私教预约、场地预约、VIP 会员、积分商城、每日打卡、社区互动、排行榜和后台管理等功能进行设计。
+Gym User Service Platform is a gym user service platform built on **Spring Boot + Vue 3 + MySQL**. The project includes three interfaces: **user interface, coach interface, and administrator interface**, designed around functions such as course booking, personal training appointment, venue reservation, VIP membership, points mall, daily check-in, community interaction, leaderboard, and back-end management.
 
-本项目默认在本地运行，数据库连接地址为 `localhost:3306/gym_db`，不会连接云端数据库。
+By default, this project runs locally, with the database connection address being `localhost:3306/gym_db`. It will not connect to a cloud database.
 
 ---
 
-## 1. 技术栈
+## 1. tech stack
 
-| 模块 | 技术 |
+| Module | Technology |
 |---|---|
-| 后端 | Spring Boot 2.7.15、Spring Security、JWT、Spring Data JPA |
-| 数据库 | MySQL，本地数据库名 `gym_db` |
-| 前端 | Vue 3、Vue Router、Vue I18n、Element Plus、Axios、Vite |
-| 构建与运行 | Maven / Maven Wrapper、Node.js、npm |
+| Backend | Spring Boot 2.7.15, Spring Security, JWT, Spring Data JPA |
+| Database | MySQL, local database name `gym_db` |
+| Front-end | Vue 3, Vue Router, Vue I18n, Element Plus, Axios, Vite |
+| Build and Run | Maven / Maven Wrapper, Node.js, npm |
 
 ---
 
-## 2. 最终版本功能概览
+## 2.  Overview of final version features
 
-### 2.1 用户端
+### 2.1 User side
 
-用户端用于普通会员日常使用，主要功能包括：
+The user end is designed for daily use by regular members, with its primary functions including:
 
-- 用户注册、登录、找回密码、重置密码
-- 首页信息展示：积分、连续打卡、快捷入口、课程推荐、VIP 入口
-- 课程预约中心：团课预约、私教预约、预约取消
-- 个人中心：个人资料、已预约课程、课程取消、投诉建议、积分记录
-- VIP 购买页面：月度、季度、年度 VIP 套餐选择与模拟支付
-- 积分商城：商品分类、积分兑换、库存变化、兑换记录
-- 每日打卡：今日打卡、连续打卡天数、月度日历、积分奖励、勋章展示
-- 社区互动：发布动态、点赞、评论、举报、加入/退出组队
-- 排行榜：总排行、本周排行、本月排行
-- 中英文切换
+- User registration, login, password recovery, password reset
+- Home page information display: points, continuous check-ins, quick entry, course recommendations, VIP access
+- Course Reservation Center: group lesson reservation, private lesson reservation, reservation cancellation
+- Personal Center: Personal Profile, Scheduled Courses, Course Cancellation, Complaints and Suggestions, Points Record
+- VIP purchase page: selection and simulated payment for monthly, quarterly, and annual VIP packages
+- Points Mall: Product Categories, Points Redemption, Inventory Changes, Redemption Records
+- Daily check-in: Today's check-in, consecutive check-in days, monthly calendar, point rewards, medal display
+- Community interaction: posting updates, liking, commenting, reporting, joining/leaving groups
+- Leaderboards: Overall Leaderboard, Weekly Leaderboard, Monthly Leaderboard
+- Switch between Chinese and English
 
-### 2.2 教练端
+### 2.2 Coach's side
 
-教练端用于教练管理课程、场地和学员信息，主要功能包括：
+The coach terminal is used for managing courses, venues, and student information. Its main functions include:
 
-- 教练登录
-- 教练首页：今日课程、待处理提醒、课程统计
-- 课程管理：查看课程、上架课程、编辑课程、删除课程
-- 场地预约：查看可预约时段、预约场地、查看本人已预约场地、删除未使用的场地预约
-- 上架课程时，场地下拉框只显示当前教练已经预约且未被课程占用的场地时段
-- 学员信息查看
-- 教练信箱：查看用户投诉、课程评价，处理投诉与回复评价
-- 教练个人信息、资质、专业领域、通知设置
-- 中英文切换
+- Coach login
+- Coach homepage: Today's courses, pending reminders, course statistics
+- Course management: View courses, list courses, edit courses, delete courses
+- Venue reservation: View available reservation time slots, reserve venues, view personally reserved venues, and cancel unused venue reservations
+- When listing courses, the venue dropdown box only displays the time slots of the venue that have been reserved by the current coach and are not occupied by any courses
+- View student information
+- Coach mailbox: view user complaints and course evaluations, handle complaints and respond to evaluations
+- Coach's personal information, qualifications, professional field, notification settings
+- Switch between Chinese and English
 
-### 2.3 管理员端
+### 2.3 Administrator Interface
 
-管理员端用于系统后台管理，主要功能包括：
+The administrator terminal is used for system backend management, with main functions including:
 
-- 管理员登录
-- 用户管理：新增、编辑、删除用户
-- 会员管理：新增会员、编辑会员、删除会员、会员状态统计
-- 课程管理：查看、编辑、删除课程，与用户端预约和教练端课程数据联动
-- 商品管理：直接管理用户端积分商城商品
-  - 新增、编辑、删除商品
-  - 设置中文名称、英文名称、中文描述、英文描述
-  - 设置商品分类、商品图标、积分价格、库存、上下架状态
-  - 中英文切换时，优先显示对应语言的商品名称和描述
-- 社区管理：查看社区内容、处理举报
-- 中英文切换
+- Administrator login
+- User management: add, edit, and delete users
+- Member management: Add new members, edit members, delete members, and perform member status statistics
+- Course management: View, edit, and delete courses, and synchronize with user-side appointments and coach-side course data
+- Product management: directly manage the products in the user-end points mall
+  - Add, edit, and delete products
+  - Set Chinese name, English name, Chinese description, and English description
+  - Set product categories, product icons, point prices, inventory, and on/off-shelf statuses
+  - When switching between Chinese and English, the product name and description in the corresponding language should be displayed first
+- Community management: Viewing community content, handling reports
+- Switch between Chinese and English
 
 ---
 
-## 3. 三端联动说明
+## 3.  Three-terminal linkage description
 
-系统重点做了用户端、教练端、管理员端之间的数据联动：
+The system focuses on the data linkage between the user terminal, coach terminal, and administrator terminal:
 
 ```text
-用户端预约课程
-  -> 教练端课程人数同步变化
-  -> 管理员端课程数据同步变化
+User-end course reservation
+  -> Synchronized change of course participants on the coach's end
+  -> Synchronization changes of course data on the administrator side
 
-用户端取消预约
-  -> 教练端/管理员端课程人数同步减少
+Cancel reservation on the user side
+  -> The number of students in the course decreases synchronously on both the coach and administrator ends
 
-教练端预约场地
-  -> 对应场地时段从可预约列表中移除
-  -> 教练端上架课程只能选择本人已预约的场地时段
+Booking a venue on the coach's side
+  -> Remove the corresponding venue time slot from the available booking list
+  -> Instructors can only choose the venue time slots that they have already booked when listing courses on the platform
 
-教练端删除未使用的场地预约
-  -> 对应场地时段恢复为可预约状态
+The coach deletes unused venue reservations
+  -> The corresponding venue time slot is restored to a bookable state
 
-教练端上架课程
-  -> 用户端课程预约中心显示该课程
-  -> 管理员端课程管理显示该课程
+List courses on the coach's platform
+  -> Display the course in the user's course reservation center
+  -> The administrator's course management displays the course
 
-用户端投诉/评价
-  -> 教练端 Coach Mailbox 可查看与处理
+Customer complaints/reviews
+  -> The Coach Mailbox on the coach's end can be viewed and processed
 
-管理员端修改课程
-  -> 用户端和教练端课程信息同步变化
+Modify courses on the administrator side
+  -> Synchronized changes in course information between the user and coach terminals
 
-用户端打卡、兑换商品、购买 VIP
-  -> 用户积分与会员状态动态变化
+User-end clock-in, redeem goods, purchase VIP
+  -> Dynamic changes in user points and membership status
 
-管理员端新增/编辑/删除积分商城商品
-  -> 用户端积分商城商品列表、库存、积分价格和中英文名称同步变化
+Add/edit/delete points mall products on the administrator side
+  -> The product list, inventory, point price, and names in both Chinese and English in the user's point mall synchronously change
 ```
 
 ---
 
-## 4. 本地数据库配置
+## 4.  Local database configuration
 
-数据库配置位于：
+The database configuration is located at:
 
 ```text
 src/main/resources/application.yml
 ```
 
-默认配置：
+Default configuration:
 
 ```yml
 spring:
@@ -122,66 +122,66 @@ spring:
     password: ${MYSQL_PASSWORD:lnj031212}
 ```
 
-含义：
+Meaning:
 
 ```text
-数据库地址：localhost:3306
-数据库名称：gym_db
-默认账号：root
-默认密码：lnj031212
+Database address: localhost:3306
+Database name: gym_db
+Default account: root
+Default password: lnj031212
 ```
 
-如果你的 MySQL 密码不是 `lnj031212`，可以在启动后端前临时设置：
+If your MySQL password is not `lnj031212`, you can temporarily set it before starting the backend:
 
 ```cmd
 set MYSQL_USERNAME=root
-set MYSQL_PASSWORD=你的MySQL密码
+Set MYSQL_PASSWORD to your MySQL password
 ```
 
-如果你之前在同一个 CMD 中设置过旧密码，例如：
+If you have previously set an old password in the same CMD, for example:
 
 ```cmd
 set MYSQL_PASSWORD=zl123456
 ```
 
-请关闭 CMD 重新打开，或者重新设置为你的当前密码。
+Please close and reopen CMD, or reset it to your current password.
 
 ---
 
-## 5. 第一次运行前创建数据库
+## 5.  Create a database before the first run
 
-打开 CMD，输入：
+Open the Command Prompt (CMD) and enter:
 
 ```cmd
 mysql -u root -p
 ```
 
-输入你的 MySQL 密码后执行：
+After entering your MySQL password, execute:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS gym_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 exit;
 ```
 
-后端连接参数中包含 `createDatabaseIfNotExist=true`，数据库不存在时通常也可以自动创建，但第一次建议手动创建，方便确认 MySQL 账号和密码是否正确。
+The backend connection parameters include `createDatabaseIfNotExist=true`, which usually allows for automatic database creation if it doesn't exist. However, it is recommended to manually create the database for the first time to ensure that the MySQL account and password are correct.
 
 ---
 
-## 6. 启动后端
+## 6. Start backend
 
-在项目根目录，也就是包含 `pom.xml` 的目录执行：
+Execute in the root directory of the project, which contains ` pom. xml `:
 
 ```cmd
 mvn spring-boot:run
 ```
 
-后端默认地址：
+Default backend address:
 
 ```text
 http://localhost:8080
 ```
 
-如果电脑没有全局 Maven，可以尝试：
+If the computer does not have global Maven, you can try:
 
 ```cmd
 mvnw.cmd spring-boot:run
@@ -189,9 +189,9 @@ mvnw.cmd spring-boot:run
 
 ---
 
-## 7. 启动前端
+## 7. Start the front-end
 
-另开一个 CMD：
+Open another CMD:
 
 ```cmd
 cd frontend
@@ -199,42 +199,42 @@ npm install
 npm run dev
 ```
 
-前端默认地址：
+Default front-end address:
 
 ```text
 http://localhost:3000
 ```
 
-Vite 会将 `/api` 请求代理到后端：
+Vite will proxy `/app ` requests to the backend:
 
 ```text
 http://localhost:8080
 ```
 
-本项目推荐使用：
+This project recommends using:
 
 ```text
-后端：http://localhost:8080
-前端：http://localhost:3000
+Backend: http://localhost:8080
+front-end http://localhost:3000
 ```
 
-也就是后端和前端分别启动。
+That is to say, the backend and frontend are started separately.
 
 ---
 
-## 8. 访问入口
+## 8. Access Portal
 
-| 端口 | 地址 |
+|Port | Address|
 |---|---|
-| 用户端 | http://localhost:3000/user/login |
-| 教练端 | http://localhost:3000/coach/login |
-| 管理员端 | http://localhost:3000/admin/login |
+|User end| http://localhost:3000/user/login  |
+|Coach end| http://localhost:3000/coach/login  |
+|Administrator end| http://localhost:3000/admin/login  |
 
 ---
 
-## 9. 测试账号
+## 9. test account
 
-### 用户端账号
+###User account
 
 ```text
 fitness_pro / 123456
@@ -242,7 +242,7 @@ gym_master / 123456
 yoga_lover / 123456
 ```
 
-### 教练端账号
+###Coach account
 
 ```text
 coach_1 / 123456
@@ -251,38 +251,38 @@ coach_3 / 123456
 coach_4 / 123456
 ```
 
-### 管理员端账号
+###Administrator account
 
 ```text
 admin / admin123
 ```
 
-说明：后端启动时会检查演示登录账号，确保 `fitness_pro`、`gym_master`、`yoga_lover` 的 `role` 为 `USER`，密码为 `123456`，避免管理员测试时误改登录身份导致无法登录。
+Explanation: When the backend is started, it will check the demo login account to ensure that the 'role' of 'fitnessspro', 'gym_master', and 'yoga after' is' USER 'and the password is' 123456', in order to avoid administrators changing their login identity during testing and being unable to log in.
 
 ---
 
-## 10. 数据初始化说明
+## 10. Data initialization instructions
 
-后端启动时会检查基础数据是否存在：
+When the backend starts, it will check whether the basic data exists:
 
-- 如果数据库为空，会初始化演示用户、教练、管理员、课程、场地、积分商城商品、社区帖子等数据。
-- 如果数据库已有数据，默认不会强制清空。
-- 场地基础数据会自动补齐，避免场地预约页面缺少区域。
-- 积分商城商品会自动补齐英文名称和英文描述。
-- 旧版普通商品会自动同步到积分商城商品表，保证管理员端商品管理和用户端积分商城使用同一套数据。
+-If the database is empty, it will initialize data such as demo users, coaches, administrators, courses, venues, point mall products, community posts, etc.
+-If the database already has data, it will not be forcibly cleared by default.
+-The basic data of the venue will be automatically supplemented to avoid missing areas on the venue reservation page.
+-The products in the points mall will automatically be supplemented with English names and descriptions.
+-The old version of regular products will be automatically synchronized to the product table of the points mall, ensuring that the administrator's product management and the user's points mall use the same set of data.
 
-如果你需要重新生成演示数据，可以在启动后端前设置：
+If you need to regenerate the presentation data, you can set the following settings before starting the backend:
 
 ```cmd
 set RESET_DEMO_DATA=true
 mvn spring-boot:run
 ```
 
-平时不要设置 `RESET_DEMO_DATA=true`，否则管理员端新增、编辑、删除的数据可能被重置。
+Do not set 'RESIT.DEMO-DATA=true' normally, otherwise the data added, edited, or deleted on the administrator side may be reset.
 
 ---
 
-## 11. 主要目录结构
+## 11. Main directory structure
 
 ```text
 Gym User Service Platform-final/
@@ -292,93 +292,93 @@ Gym User Service Platform-final/
 ├── scripts/
 │   └── repair_demo_user_login.sql
 ├── src/main/java/com/gym/service/
-│   ├── config/          # 安全配置、初始化数据、跨域配置
-│   ├── controller/      # 后端接口
-│   ├── entity/          # 数据库实体
-│   ├── repository/      # JPA 数据访问层
-│   ├── service/         # 业务逻辑层
-│   └── util/            # JWT 工具类
+│∝ - config/# Security configuration, initialization data, cross domain configuration
+│∝ - Controller/# Backend Interface
+│∝ - entity/# database entity
+│∝ - Repository/# JPA Data Access Layer
+│∝ - Service/# Business Logic Layer
+│└ - Utility/# JWT tool class
 ├── src/main/resources/
-│   ├── application.yml  # 本地数据库与后端端口配置
+│∝ - Application. yml # Local database and backend port configuration
 │   └── application.properties
 └── frontend/
-    ├── package.json
-    ├── package-lock.json
-    ├── vite.config.js
-    └── src/
-        ├── router/      # 前端路由
-        ├── i18n/        # 中英文语言包
-        ├── services/    # 前端 API 请求封装
-        ├── config/      # 用户端导航配置
-        ├── components/  # 公共组件
-        └── views/       # 用户端、教练端、管理员端页面
+├── package.json
+├── package-lock.json
+├── vite.config.js
+└── src/
+∝ - router/# Front end router
+∝ - i18n/# Chinese English Language Pack
+∝ - Services/# Front end API Request Encapsulation
+∝ - config/# User side navigation configuration
+∝ - Components/# Common Components
+└ - Views/# User, Coach, and Administrator Pages
 ```
 
 ---
 
-## 12. 常见问题
+## 12. Frequently Asked Questions
 
-### 12.1 MySQL 密码无法登录
+###12.1 MySQL password cannot log in
 
-如果执行：
+If executed:
 
 ```cmd
 mysql -u root -p
 ```
 
-输入 `lnj031212` 无法登录，但输入旧密码可以登录，说明你电脑上的 MySQL root 密码还没有改。可以先用旧密码进入 MySQL，再执行：
+Unable to log in by entering 'lnj031212', but can log in by entering the old password, indicating that the MySQL root password on your computer has not been changed. You can first use the old password to enter MySQL, and then execute:
 
 ```sql
 ALTER USER 'root'@'localhost' IDENTIFIED BY 'lnj031212';
 FLUSH PRIVILEGES;
 ```
 
-### 12.2 后端启动失败，提示数据库连接错误
+###12.2 Backend startup failed, prompting database connection error
 
-检查：
+check
 
 ```text
-1. MySQL 服务是否已经启动
-2. root 密码是否和 application.yml 或 MYSQL_PASSWORD 一致
-3. gym_db 数据库是否存在
-4. 是否在同一个 CMD 中残留了旧的 MYSQL_PASSWORD 环境变量
+1. Has the MySQL service been started
+2. Is the root password consistent with application.yml or MYVNet PASSWORD
+3. Does the gym_db database exist
+4. Are there any old MYVNet PASSWORD environment variables remaining in the same CMD
 ```
 
-如果设置过旧环境变量，可以关闭 CMD 重新打开，或者重新设置：
+If the old environment variables have been set, you can close CMD and reopen it, or reset:
 
 ```cmd
 set MYSQL_PASSWORD=lnj031212
 ```
 
-### 12.3 前端页面显示旧内容
+###12.3 Front end page displays old content
 
-浏览器可能缓存旧页面。启动新版后建议按：
+The browser may cache old pages. After launching the new version, it is recommended to follow:
 
 ```text
 Ctrl + F5
 ```
 
-### 12.4 只启动后端访问 8080 看不到新版前端
+###12.4 Only starting the backend access 8080 does not show the new version of the frontend
 
-当前项目推荐用前后端分离方式运行：
-
-```text
-后端：http://localhost:8080
-前端：http://localhost:3000
-```
-
-如果只启动后端并访问 `http://localhost:8080`，可能看不到最新前端页面，因为当前源码包没有使用 `src/main/resources/static` 作为主要前端入口。
-
-### 12.5 用户账号突然无法登录
-
-如果管理员端测试时误把用户的 `role` 改成了 `VIP` 或其他值，用户端登录可能失败。正确规则是：
+The current project recommends running with front-end and back-end separation:
 
 ```text
-users.role = 登录身份，只能是 USER / COACH / ADMIN
-membership = 会员等级，例如 VIP / 普通会员
+Backend: http://localhost:8080
+front-end http://localhost:3000
 ```
 
-可以执行：
+If only the backend is launched and accessed` http://localhost:8080 `You may not be able to see the latest frontend page because the current source code package does not use 'src/main/resources/static' as the main frontend entry.
+
+###12.5 User account suddenly unable to log in
+
+If the administrator mistakenly changes the user's' role 'to' VIP 'or other values during testing, the user login may fail. The correct rule is:
+
+```text
+Users. role=login identity, can only be User/COACH/ADMIN
+Membership=membership level, such as VIP/regular member
+```
+
+Can execute:
 
 ```sql
 USE gym_db;
@@ -387,36 +387,36 @@ SET role = 'USER', active = 1, password = '123456'
 WHERE username IN ('fitness_pro', 'gym_master', 'yoga_lover');
 ```
 
-项目启动后也会自动检查并修复这三个演示用户账号。
+After the project is launched, these three demo user accounts will also be automatically checked and repaired.
 
 ---
 
-## 13. 本版本最终检查记录
+## 13. Final inspection record of this version
 
-本版本在打包前完成了以下检查和收尾修复：
+This version completed the following checks and final fixes before packaging:
 
 ```text
-1. 检查前端相对路径 import，未发现缺失引用。
-2. 检查 zh.json / en.json，JSON 语法正常。
-3. 检查 Vue 与 JS 脚本语法，未发现语法错误。
-4. 检查 Java 源码括号结构，未发现明显结构错误。
-5. 确认数据库仍然连接本地 localhost:3306/gym_db。
-6. 确认默认数据库密码为 lnj031212。
-7. 确认用户端、教练端、管理员端主要路由入口存在。
-8. 确认场地预约、删除预约、上架课程场地下拉框之间的字段已对齐。
-9. 确认用户端 VIP 支付页和首页入口保留。
-10. 确认管理员端商品管理使用积分商城商品表，能影响用户端积分商城。
-11. 修复旧版普通商品同步到积分商城后缺少英文名称/英文描述的问题。
-12. 对齐 application.properties 和 application.yml 中的 JWT 配置，避免重复配置造成理解混乱。
+1. Checked the front-end relative path import and did not find any missing references.
+2. Check zhjson/enjson, JSON syntax is normal.
+3. Checked Vue and JS script syntax, no syntax errors were found.
+4. Checked the bracket structure of the Java source code and did not find any obvious structural errors.
+5. Confirm that the database is still connected to the local localhost: 3306/gym_db.
+6. Confirm that the default database password is lnj031212.
+7. Confirm that the main routing entry points for the user end, coach end, and administrator end exist.
+8. Confirm that the fields between the venue reservation, deletion reservation, and the pull-out box of the course venue have been aligned.
+9. Confirm that the VIP payment page and homepage entrance on the user side are retained.
+10. Confirm that using the points mall product table for administrator side product management can affect the user side points mall.
+11. Fixed the issue of missing English names/descriptions when synchronizing old regular products to the points mall.
+12. Align the JWT configuration in application.exe and application.jml to avoid confusion caused by duplicate configurations.
 ```
 
-说明：当前检查环境无法联网下载 Gradle，也没有全局 Maven，因此完整后端编译请在你的本地电脑执行：
+Explanation: The current checking environment is unable to download Gradle from the internet, and there is no global Maven available. Therefore, please perform the full backend compilation on your local computer
 
 ```cmd
 mvn spring-boot:run
 ```
 
-前端完整运行请在本地执行：
+Please run the front-end fully locally:
 
 ```cmd
 cd frontend
@@ -426,6 +426,11 @@ npm run dev
 
 ---
 
-## 14. 备注
+## 14.Team Contribution
+Nanjiang Li: Responsible for user profile and personal centre, including user information, membership display, booked class list, cancellation from profile, complaint entry, and related user-side workflow testing.
 
-本项目是本地演示与毕业设计项目版本，支付功能为模拟支付，不会发起真实扣款。项目的商城、VIP、打卡、预约、社区等数据都会写入本地 MySQL 数据库。
+Junhaotong Zhu: Responsible for VIP membership, points, points mall, administrator product linkage, bilingual product display, daily check-in, points rewards, and related testing/documentation.
+
+Qilong Wang: Responsible for class management, group/private class booking, coach facility reservation, add-class linkage with reserved venues, administrator class management, and class-related testing.
+
+Shurui Guo: Responsible for community, ranking, complaints, reports, coach mailbox, administrator community management, and related interaction/testing functions.
