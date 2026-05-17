@@ -1,45 +1,45 @@
-# 基于 SpringBoot 的健身房用户服务平台的设计与实现
+#Design and Implementation of a Gym User Service Platform Based on SpringBoot
 
-v49 为 MySQL 动态持久化 + 丰富演示数据版，技术结构保持为：
+V49 is a MySQL dynamic persistence+rich demonstration data version, with the technical structure maintained as follows:
 
-- 后端：Spring Boot 2.7 + Java 8 + JDBC + MySQL
-- 前端：Vue 3 + Vite
-- 开发运行：后端 `mvn spring-boot:run`，前端 `npm run dev`
-- 生产运行：`mvn clean package -DskipTests` 后 `java -jar target/gym-user-service-platform-mysql-dynamic-1.0.0.jar`
+-Backend: Spring Boot 2.7+Java 8+JDBC+MySQL
+-Front end: Vue 3+Vite
+-Development and operation: backend 'mvn spring boot: run', frontend 'npm run dev'`
+-Production run: ` mvn clean package - DskipTests ` followed by ` java jar target/gym user service platform - mysql-dynamic-1.0.0.jar '`
 
-## 一、MySQL 配置
+##1、 MySQL configuration
 
-默认连接：
+Default Connection:
 
 ```properties
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/fitlife_service?createDatabaseIfNotExist=true...
+spring.datasource.url=jdbc: mysql://127.0.0.1:3306/fitlife_service?createDatabaseIfNotExist=true...
 spring.datasource.username=root
 spring.datasource.password=lnj031212
 ```
 
-如果你的 MySQL 密码不是 `lnj031212`，请修改：
+If your MySQL password is not 'lnj031212', please modify it:
 
 ```text
 src/main/resources/application.properties
 ```
 
-第一次使用或需要重置数据库结构时执行：
+Execute when using or resetting the database structure for the first time:
 
 ```bash
 mysql -uroot -p < database/fitlife_mysql.sql
 ```
 
-如果数据库已经存在并且 `/api/health` 显示 `storage: MySQL`，后续启动通常不需要重复执行 SQL。
+If the database already exists and '/app/health' displays' storage: MySQL ', subsequent startup usually does not require repeated SQL execution.
 
-## 二、开发模式运行
+##2、 Development mode operation
 
-后端：
+Backend:
 
 ```bash
 mvn spring-boot:run
 ```
 
-前端：
+front-end
 
 ```bash
 cd frontend
@@ -47,23 +47,23 @@ npm install
 npm run dev
 ```
 
-访问：
+visit:
 
 ```text
 http://localhost:3000
 ```
 
-Vite 已配置代理：
+Vite has configured proxy:
 
 ```text
-/api -> http://127.0.0.1:8080
+/api ->  http://127.0.0.1:8080
 ```
 
-前端也增加了 3000 到 8080 的直连兜底，频繁切换用户端 / 管理端 / 教练端后，登录按钮不会一直卡在“登录中”。
+The front-end has also added a direct connection fallback from 3000 to 8080. After frequently switching between the user end/management end/coach end, the login button will not remain stuck in the "login" button.
 
-## 三、默认测试账号
+##3、 Default test account
 
-用户端测试会员账号，密码均为 `123456`：
+User testing member account, password is' 123456 ':
 
 ```text
 fitness_pro
@@ -74,52 +74,52 @@ dance_queen
 fit_newbie
 ```
 
-其他端口：
+Other ports:
 
 ```text
-管理员端：admin / admin123
-教练端：coach_1 / 123456
-教练端：coach_2 / 123456
-教练端：coach_3 / 123456
+Administrator end: admin/admin123
+Coach end: coach_1/123456
+Coach end: coach_2/123456
+Coach end: coach_3/123456
 ```
 
-## 四、本版主要修复与优化
+##4、 This version mainly fixes and optimizes
 
-- 修复频繁切换端口后登录卡住的问题：登录请求 7 秒超时、失败后自动释放按钮、开发模式直连 8080 兜底。
-- 用户端登录页测试账号增加到 3 个，并同步更新初始化用户邮箱。
-- 用户端首页 Community 不再空白：后端初始化社区数据，前端也提供兜底展示。
-- 教练端首页保留 v6 风格 Dashboard：只显示统计卡片和 Today's Schedule，个人信息 / Gym crowd count / Overview 留在 My Profile。
-- 教练端预约场地使用时段下方确认按钮，不再使用浏览器顶部 confirm 弹窗。
-- 私教课弹窗增加兜底课程提示，避免出现空白。
-- 管理端、用户端、教练端继续共用 MySQL 动态状态。
+-Fixed the issue of login freezing after frequent port switching: login request timeout of 7 seconds, automatic release button after failure, direct connection to 8080 in development mode as a fallback.
+-Increase the number of test accounts on the user login page to 3 and update the initialized user email synchronously.
+-The user side homepage Community is no longer blank: the backend initializes community data, and the frontend also provides a fallback display.
+-The coach's homepage retains the v6 style dashboard: only displaying statistical cards and Today's Schedule, leaving personal information/Gym crowd count/Overview in My Profile.
+-The confirmation button below the coach's reserved venue usage period will no longer use the confirm pop-up window at the top of the browser.
+-Add a fallback course prompt to the pop-up window of private teaching courses to avoid blank spaces.
+-The management end, user end, and coach end continue to share MySQL dynamic state.
 
 
-## 五、v49 丰富演示数据
+##5、 V49 Rich Demonstration Data
 
-本版本为了让答辩、演示和测试更完整，已将初始化数据扩展为：
+In order to make the defense, demonstration, and testing more complete, this version has expanded the initialization data to:
 
-- 12 个会员、6 个教练；
-- 40 条课程：28 条团课 + 12 条私教课；
-- 29 条课程预约记录；
-- 15 个场地 / 设施，6 条教练场地预约；
-- 18 个积分商城商品，5 条兑换记录；
-- 7 条社区动态、6 个组队小队和多条评论；
-- 多条投诉、咨询和教练评价。
+-12 members, 6 coaches;
+-40 courses: 28 group courses+12 private courses;
+-29 course reservation records;
+-15 venues/facilities, 6 coaching venues reserved;
+-18 points mall products, 5 redemption records;
+-7 community updates, 6 team building teams, and multiple comments;
+-Multiple complaints, consultations, and coach evaluations.
 
-持久化 state key 已更新为 `fitlife-v49-rich-database-state`，首次启动 v49 会自动写入新数据。
+The persistent state key has been updated to 'fitlife-v49-rich database state', and new data will be automatically written when v49 is first started.
 
-## 六、动态数据说明
+##6、 Dynamic Data Explanation
 
-主要业务数据来自后端接口并持久化到 MySQL：
+The main business data comes from backend interfaces and is persisted to MySQL:
 
-- 用户、会员、VIP 到期日
-- 教练、课程、预约、取消预约
-- 积分、积分商品、兑换记录、库存和销量
-- 社区帖子、回复、点赞、置顶、组队
-- 打卡记录、连续打卡天数、徽章状态
-- 投诉建议、教练评价、教练课程管理
+-User, member, VIP expiration date
+-Coach, course, appointment, cancellation of appointment
+-Points, point based products, redemption records, inventory, and sales volume
+-Community posts, replies, likes, topping, teaming up
+-Check in records, consecutive check-in days, badge status
+-Complaints and suggestions, coach evaluations, coach course management
 
-`fitlife_state` 保存完整业务状态，以下可读表用于查看主要动态数据：
+`Fitlife_state 'saves the complete business status, and the following readable table is used to view the main dynamic data:
 
 ```text
 fitlife_users
