@@ -168,11 +168,9 @@
               </header>
               <h3 class="cbook-modal-title">{{ lang==='zh'?'可预约课程':'Available Courses' }}</h3>
               <div class="cbook-private-list">
-                <div v-if="privateCourseLoading" class="pc-empty">{{ lang==='zh'?'正在加载私教课程...':'Loading private courses...' }}</div>
-                <div v-else-if="!selectedCoachCourses.length" class="pc-empty">{{ lang==='zh'?'暂无可预约私教课':'No private courses available' }}</div>
                 <article v-for="pc in selectedCoachCourses" :key="pc.id">
                   <div><b>{{ compactTime(pc) }}</b><h4>{{ pick(pc,'name') }}</h4><p>{{ pc.duration || (lang==='zh'?'60分钟':'60 min') }}</p></div>
-                  <button :class="{cancel:isCourseBooked(pc), full:!isCourseBooked(pc)&&spotsLeft(pc)<=0}" @click="togglePrivateBooking(pc)" :disabled="isBookingBusy(pc)||(!isCourseBooked(pc)&&spotsLeft(pc)<=0)">{{ isBookingBusy(pc) ? (lang==='zh'?'处理中...':'Processing...') : (isCourseBooked(pc) ? (lang==='zh'?'取消预约':'Cancel Booking') : (spotsLeft(pc)<=0 ? (lang==='zh'?'已满':'Full') : (lang==='zh'?'预约':'Book'))) }}</button>
+                  <button :class="{cancel:isCourseBooked(pc)}" @click="togglePrivateBooking(pc)" :disabled="isBookingBusy(pc)">{{ isBookingBusy(pc) ? (lang==='zh'?'处理中...':'Processing...') : (isCourseBooked(pc) ? (lang==='zh'?'取消预约':'Cancel Booking') : (lang==='zh'?'预约':'Book')) }}</button>
                 </article>
               </div>
             </section>
@@ -385,7 +383,7 @@
             </section>
             <section v-else-if="route==='/admin/community'" class="admin-v24-page admin-v34-community">
               <div class="admin-v24-title"><h1>{{ lang==='zh'?'社区管理':'Community Management' }}</h1><div class="admin-v34-switch"><button :class="{on:adminCommunityTab==='posts'}" @click="adminCommunityTab='posts'">Posts</button><button :class="{on:adminCommunityTab==='reports'}" @click="adminCommunityTab='reports'">Reports</button></div></div>
-              <div v-if="adminCommunityTab==='posts'" class="admin-v34-posts"><article v-for="p in posts" :key="p.id" class="admin-v34-post"><div class="bubble">💬</div><div class="body"><header><div><b>{{ p.author || p.username }}</b><small>{{ prettyDate(p.createdAt) }}</small></div><em>{{ adminPostCategoryLabel(p.category) }}</em></header><p>{{ p.content }}</p><div class="meta">👍 {{ p.likes || 0 }}　💬 {{ p.comments || (p.replies&&p.replies.length) || 0 }}</div><footer><button @click="openAdminPostDialog(p)">{{ lang==='zh'?'编辑':'Edit' }}</button><button class="danger" @click="deletePost(p)">{{ lang==='zh'?'删除':'Delete' }}</button></footer></div></article></div>
+              <div v-if="adminCommunityTab==='posts'" class="admin-v34-posts"><article v-for="p in posts" :key="p.id" class="admin-v34-post"><div class="bubble">💬</div><div class="body"><header><div><b>{{ p.author || p.username }}</b><small>{{ prettyDate(p.createdAt) }}</small></div><em>{{ adminPostCategoryLabel(p.category) }}</em></header><p>{{ p.content }}</p><div class="meta">👍 {{ p.likes || 0 }}　💬 {{ p.comments || (p.replies&&p.replies.length) || 0 }}</div><footer><button @click="openPostDialog(p)">Edit</button><button class="danger" @click="deletePost(p)">Delete</button></footer></div></article></div>
               <div v-else class="admin-v34-reports"><article v-for="r in adminReports" :key="r.id" class="admin-v34-report"><header><div><b>Report No.{{ r.id }}</b><small>{{ prettyDate(r.createdAt) }}</small></div><span :class="String(r.status).toUpperCase().includes('PENDING')?'pending':'resolved'">{{ reportStatusLabel(r.status) }}</span></header><section><p><b>Reporter:</b>{{ r.reporter }}</p><p><b>Reported post:</b>{{ r.postContent || r.content || r.reportedContent || '' }}</p><p><b>Reason:</b><em>{{ r.reason || r.type }}</em></p></section><footer><button :disabled="!String(r.status).toUpperCase().includes('PENDING')" class="handle" @click="processAdminReport(r)">Handle</button><button :disabled="!String(r.status).toUpperCase().includes('PENDING')" class="dismiss" @click="ignoreAdminReport(r)">Dismiss</button></footer></article></div>
             </section>
           </main>
@@ -446,29 +444,29 @@
       <div class="coach-v36-shell">
         <header class="coach-v36-head">
           <div class="coach-v36-inner">
-            <div class="coach-v36-brand"><span>👨‍🏫</span><strong>{{ lang==='zh'?'FitLife 教练端':'FitLife Coach' }}</strong></div>
+            <div class="coach-v36-brand"><span>👨‍🏫</span><strong>FitLife Coach Login</strong></div>
             <nav class="coach-v36-nav">
               <button v-for="item in coachMenu" :key="item.path" :class="{on:route===item.path}" @click="go(item.path)">{{ coachNavLabel(item) }}</button>
             </nav>
             <div class="coach-v36-tools">
               <div class="coach-v36-lang"><button @click="setLang('zh')" :class="{on:lang==='zh'}">中文</button><button @click="setLang('en')" :class="{on:lang==='en'}">English</button></div>
               <b>{{ userHandle || 'coach_1' }}</b>
-              <button @click="logout">{{ lang==='zh'?'退出登录':'Logout' }}</button>
+              <button @click="logout">Logout</button>
             </div>
           </div>
         </header>
         <main class="coach-v36-main">
           <section v-if="route==='/coach/dashboard'" class="coach-v36-page coach-v36-dashboard">
-            <h1>🏠 {{ lang==='zh'?'教练工作台':'Coach Dashboard' }}</h1>
-            <p>{{ lang==='zh'?'欢迎回来':'Welcome back' }}，{{ userHandle || 'coach_1' }}!</p>
+            <h1>🏠 {{ lang==='zh'?'Coach Dashboard':'Coach Dashboard' }}</h1>
+            <p>{{ lang==='zh'?'Welcome back':'Welcome back' }}, {{ userHandle || 'coach_1' }}!</p>
             <div class="coach-v36-stat-row">
-              <article><i>👥</i><b>{{ coachStats.activeUsers || 0 }}</b><span>{{ lang==='zh'?'场内活跃用户':'Active Users in Gym' }}</span></article>
-              <article><i>🗓️</i><b>{{ coachTodaySchedule.length }}</b><span>{{ lang==='zh'?'今日课程':"Today's Classes" }}</span></article>
-              <article><i>🔔</i><b>{{ coachPendingCount }}</b><span>{{ lang==='zh'?'待处理请求':'Pending Requests' }}</span></article>
+              <article><i>👥</i><b>{{ coachStats.activeUsers || 0 }}</b><span>{{ lang==='zh'?'Active Users in Gym':'Active Users in Gym' }}</span></article>
+              <article><i>🗓️</i><b>{{ coachTodaySchedule.length }}</b><span>{{ lang==='zh'?"Today's Classes":"Today's Classes" }}</span></article>
+              <article><i>🔔</i><b>{{ coachPendingCount }}</b><span>{{ lang==='zh'?'Pending Requests':'Pending Requests' }}</span></article>
             </div>
             <section class="coach-v36-schedule-card">
-              <h2>📋 {{ lang==='zh'?'今日课程安排':"Today's Schedule" }}</h2>
-              <div v-if="!coachTodaySchedule.length" class="coach-v36-empty"><i>🗓️</i><p>{{ lang==='zh'?'今日暂无课程':'No schedule for today' }}</p></div>
+              <h2>📋 {{ lang==='zh'?"Today's Schedule":"Today's Schedule" }}</h2>
+              <div v-if="!coachTodaySchedule.length" class="coach-v36-empty"><i>🗓️</i><p>{{ lang==='zh'?'No schedule for today':'No schedule for today' }}</p></div>
               <article v-for="c in coachTodaySchedule" :key="c.id" class="coach-v36-schedule-item">
                 <div><strong>{{ coachDisplayTime(c) }}</strong><b>{{ pick(c,'name') }}</b><span>📍 {{ pick(c,'location') }} · 👥 {{ c.bookedCount||0 }}/{{ c.capacity||20 }}</span></div>
                 <em :class="coachClassStatusClass(c)">{{ coachClassStatusLabel(c) }}</em>
@@ -477,67 +475,67 @@
           </section>
 
           <section v-else-if="route==='/coach/profile'" class="coach-v36-page">
-            <h1>👤 {{ lang==='zh'?'个人中心':'Personal Center' }}</h1><p>{{ lang==='zh'?'管理个人资料与通知设置':'Manage your profile and notification preferences' }}</p>
+            <h1>👤 {{ lang==='zh'?'Personal Center':'Personal Center' }}</h1><p>{{ lang==='zh'?'Manage your profile and notification preferences':'Manage your profile and notification preferences' }}</p>
             <div class="coach-v36-profile-grid">
               <section class="coach-v36-profile-card">
-                <h2>{{ lang==='zh'?'个人资料':'Profile' }}</h2>
-                <div class="coach-v36-profile-head"><div class="coach-v36-avatar">{{ coachProfile.avatar || '👨‍🏫' }}</div><div><h3>{{ coachProfile.name || '张教练' }}</h3><p>{{ lang==='zh'?'认证教练':'Certified Coach' }}</p></div></div>
+                <h2>Profile</h2>
+                <div class="coach-v36-profile-head"><div class="coach-v36-avatar">{{ coachProfile.avatar || '👨‍🏫' }}</div><div><h3>{{ coachProfile.name || '张教练' }}</h3><p>Certified Coach</p></div></div>
                 <dl>
-                  <div><dt>{{ lang==='zh'?'用户名':'Username' }}</dt><dd>{{ coachProfile.username || 'coach_1' }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'邮箱':'Email' }}</dt><dd>{{ coachProfile.email || 'coach1@fitlife.com' }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'手机号':'Phone' }}</dt><dd>{{ coachProfile.phone || '13800000001' }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'教龄':'Experience' }}</dt><dd>{{ coachProfile.experienceYears || 5 }} {{ lang==='zh'?'年':'yrs' }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'资质证书':'Certifications' }}</dt><dd>{{ coachProfile.certifications || (lang==='zh'?'国家级健身教练认证、高级私教证书':'National Fitness Coach Certification, Advanced Personal Trainer Certificate') }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'擅长方向':'Specialty' }}</dt><dd>{{ coachProfile.specialty || (lang==='zh'?'力量训练、增肌塑形、功能性训练':'Strength Training, Muscle Gain & Body Shaping, Functional Training') }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'课时费':'Hourly rate' }}</dt><dd>¥{{ Number(coachProfile.hourlyRate||300).toFixed(0) }}/{{ lang==='zh'?'小时':'hr' }}</dd></div>
-                  <div><dt>{{ lang==='zh'?'评分':'Rating' }}</dt><dd>⭐ {{ coachProfile.rating || '4.6' }}</dd></div>
+                  <div><dt>Username</dt><dd>{{ coachProfile.username || 'coach_1' }}</dd></div>
+                  <div><dt>Email</dt><dd>{{ coachProfile.email || 'coach1@fitlife.com' }}</dd></div>
+                  <div><dt>Phone</dt><dd>{{ coachProfile.phone || '13800000001' }}</dd></div>
+                  <div><dt>Experience</dt><dd>{{ coachProfile.experienceYears || 5 }} yrs</dd></div>
+                  <div><dt>Certifications</dt><dd>{{ coachProfile.certifications || 'National Fitness Coach Certification, Advanced Personal Trainer Certificate' }}</dd></div>
+                  <div><dt>Specialty</dt><dd>{{ coachProfile.specialty || 'Strength Training, Muscle Gain & Body Shaping, Functional Training' }}</dd></div>
+                  <div><dt>Hourly rate</dt><dd>¥{{ Number(coachProfile.hourlyRate||300).toFixed(0) }}/hr</dd></div>
+                  <div><dt>Rating</dt><dd>⭐ {{ coachProfile.rating || '4.6' }}</dd></div>
                 </dl>
               </section>
               <section class="coach-v36-notify-card">
-                <h2>{{ lang==='zh'?'通知设置':'Notifications' }}</h2>
+                <h2>Notifications</h2>
                 <article v-for="n in coachNotifyRows" :key="n.key"><div><b>{{ n.title }}</b><span>{{ n.desc }}</span></div><label class="coach-v36-switch"><input type="checkbox" v-model="coachNotify[n.key]"><i></i></label></article>
-                <button @click="saveCoachSettings">{{ lang==='zh'?'保存设置':'Save settings' }}</button>
+                <button @click="saveCoachSettings">Save settings</button>
               </section>
             </div>
-            <section class="coach-v36-crowd"><h2>{{ lang==='zh'?'健身房人流统计':'Gym crowd count' }}</h2><p>{{ lang==='zh'?'活跃人数基于最近一小时内扫码或打卡的会员计算。会员可在个人中心出示二维码，前台扫码确认。':'Active count is based on members who scanned or checked in within the last hour. Members show the QR from Profile; staff scans it at the desk.' }}</p><a href="#">{{ lang==='zh'?'打开前台扫码页（平板）':'Open staff scan page (tablet)' }}</a></section>
-            <h2 class="coach-v36-overview-title">📊 {{ lang==='zh'?'总览':'Overview' }}</h2>
-            <div class="coach-v36-overview"><article><b>{{ coachClasses.length }}</b><span>{{ lang==='zh'?'课程总数':'Total classes' }}</span></article><article><b>{{ coachStudents.length }}</b><span>{{ lang==='zh'?'学员总数':'Total students' }}</span></article><article><b>{{ coachProfile.rating || '4.6' }}</b><span>{{ lang==='zh'?'平均评分':'Avg. rating' }}</span></article><article><b>{{ coachMonthlyCount }}</b><span>{{ lang==='zh'?'本月课程':'This month' }}</span></article></div>
+            <section class="coach-v36-crowd"><h2>Gym crowd count</h2><p>Active count is based on members who scanned or checked in within the last hour.<br>Members show the QR from Profile; staff scans it at the desk.</p><a href="#">Open staff scan page (tablet)</a></section>
+            <h2 class="coach-v36-overview-title">📊 Overview</h2>
+            <div class="coach-v36-overview"><article><b>{{ coachClasses.length }}</b><span>Total classes</span></article><article><b>{{ coachStudents.length }}</b><span>Total students</span></article><article><b>{{ coachProfile.rating || '4.6' }}</b><span>Avg. rating</span></article><article><b>{{ coachMonthlyCount }}</b><span>This month</span></article></div>
           </section>
 
           <section v-else-if="route==='/coach/classes'" class="coach-v36-page">
-            <h1>📚 {{ lang==='zh'?'课程管理':'Class Management' }}</h1><p>{{ lang==='zh'?'管理课程、场地预约和学员信息':'Manage your classes and students' }}</p>
+            <h1>📚 Class Management</h1><p>Manage your classes and students</p>
             <div class="coach-v36-tabs">
-              <button :class="{on:coachSubTab==='mine'}" @click="coachSubTab='mine'">📋 {{ lang==='zh'?'我的课程':'My Classes' }}</button>
-              <button :class="{on:coachSubTab==='add'}" @click="coachSubTab='add'; resetCoachClassForm()">➕ {{ lang==='zh'?'新增课程':'Add Class' }}</button>
-              <button :class="{on:coachSubTab==='facility'}" @click="coachSubTab='facility'">🏋️ {{ lang==='zh'?'预约场地':'Book Facility' }}</button>
-              <button :class="{on:coachSubTab==='students'}" @click="coachSubTab='students'">👥 {{ lang==='zh'?'我的学员':'Students' }}</button>
+              <button :class="{on:coachSubTab==='mine'}" @click="coachSubTab='mine'">📋 My Classes</button>
+              <button :class="{on:coachSubTab==='add'}" @click="coachSubTab='add'; resetCoachClassForm()">➕ Add Class</button>
+              <button :class="{on:coachSubTab==='facility'}" @click="coachSubTab='facility'">🏋️ Book Facility</button>
+              <button :class="{on:coachSubTab==='students'}" @click="coachSubTab='students'">👥 Students</button>
             </div>
 
             <section v-if="coachSubTab==='mine'" class="coach-v36-panel">
-              <select class="coach-v36-select" v-model="coachClassFilter"><option value="all">{{ lang==='zh'?'全部课程':'All Classes' }}</option><option value="upcoming">{{ lang==='zh'?'未开始':'Upcoming' }}</option><option value="completed">{{ lang==='zh'?'已完成':'Completed' }}</option></select>
+              <select class="coach-v36-select" v-model="coachClassFilter"><option value="all">All Classes</option><option value="upcoming">Upcoming</option><option value="completed">Completed</option></select>
               <div class="coach-v36-class-grid">
                 <article v-for="c in filteredCoachClasses" :key="c.id" class="coach-v36-class-card">
                   <em>{{ coachDisplayTime(c) }}</em><span :class="coachClassStatusClass(c)">{{ coachClassStatusLabel(c) }}</span>
-                  <h3>{{ pick(c,'name') }}</h3><p>📍 {{ pick(c,'location') }} &nbsp;&nbsp; 👥 {{ c.bookedCount||0 }}/{{ c.capacity||20 }} {{ lang==='zh'?'人':'people' }}</p>
-                  <footer><button @click="openCoachEdit(c)">{{ lang==='zh'?'编辑':'Edit' }}</button><button class="danger" @click="coachDeleteClass(c)">{{ lang==='zh'?'删除':'Delete' }}</button></footer>
+                  <h3>{{ pick(c,'name') }}</h3><p>📍 {{ pick(c,'location') }} &nbsp;&nbsp; 👥 {{ c.bookedCount||0 }}/{{ c.capacity||20 }} people</p>
+                  <footer><button @click="openCoachEdit(c)">Edit</button><button class="danger" @click="coachDeleteClass(c)">Delete</button></footer>
                 </article>
               </div>
             </section>
 
             <section v-else-if="coachSubTab==='add'" class="coach-v36-panel coach-v36-add-panel">
-              <label>{{ lang==='zh'?'课程名称':'Class Name' }}<input v-model="coachClassForm.name" :placeholder="lang==='zh'?'请输入课程名称':'Enter class name'"></label>
-              <div class="coach-v36-form-row"><label>{{ lang==='zh'?'日期':'Date' }}<input v-model="coachClassForm.date" type="date"></label><label>{{ lang==='zh'?'开始时间':'Start Time' }}<input v-model="coachClassForm.startTime" type="time"></label><label>{{ lang==='zh'?'结束时间':'End Time' }}<input v-model="coachClassForm.endTime" type="time"></label></div>
-              <div class="coach-v36-form-row"><label>{{ lang==='zh'?'场地':'Location' }} <small>{{ lang==='zh'?'请先预约场地':'Book a facility first' }}</small><select v-model="coachClassForm.reservedBookingId" @change="chooseReservedFacility"><option value="">{{ lang==='zh'?'选择已预约场地':'Select a booked facility' }}</option><option v-for="b in availableCoachBookings" :key="b.id" :value="String(b.id)">{{ pickFacilityBooking(b) }}</option></select><small>{{ lang==='zh'?'这里只显示已确认且未使用的场地预约，选择后会自动填入日期和时间。':'Only confirmed facility bookings are shown here. Selecting one fills in the date and time automatically.' }}</small></label><label>{{ lang==='zh'?'容量':'Capacity' }}<input v-model.number="coachClassForm.capacity" type="number" min="1"></label></div>
-              <label>{{ lang==='zh'?'课程说明':'Description' }}<textarea v-model="coachClassForm.description" :placeholder="lang==='zh'?'请输入课程说明':'Enter class description'"></textarea></label>
-              <button class="coach-v36-wide" @click="submitCoachClass">{{ lang==='zh'?'新增课程':'Add Class' }}</button>
+              <label>Class Name<input v-model="coachClassForm.name" placeholder="Enter class name"></label>
+              <div class="coach-v36-form-row"><label>Date<input v-model="coachClassForm.date" type="date"></label><label>Start Time<input v-model="coachClassForm.startTime" type="time"></label><label>End Time<input v-model="coachClassForm.endTime" type="time"></label></div>
+              <div class="coach-v36-form-row"><label>Location <small>Book a facility first</small><select v-model="coachClassForm.reservedBookingId" @change="chooseReservedFacility"><option value="">Select a booked facility</option><option v-for="b in availableCoachBookings" :key="b.id" :value="String(b.id)">{{ pickFacilityBooking(b) }}</option></select><small>Only confirmed facility bookings are shown here. Selecting one fills in the date and time automatically.</small></label><label>Capacity<input v-model.number="coachClassForm.capacity" type="number" min="1"></label></div>
+              <label>Description<textarea v-model="coachClassForm.description" placeholder="Enter class description"></textarea></label>
+              <button class="coach-v36-wide" @click="submitCoachClass">Add Class</button>
             </section>
 
             <section v-else-if="coachSubTab==='facility'" class="coach-v36-panel">
               <div class="coach-v36-facilities">
                 <article v-for="f in coachFacilities" :key="f.id" class="coach-v36-facility-card">
-                  <header><h3>{{ pick(f,'name') }}</h3><span>{{ lang==='zh'?'可预约':'Available' }}</span></header>
-                  <p>{{ pick(f,'description') }}</p><p><b>{{ lang==='zh'?'设备':'Equipment' }}:</b> {{ pick(f,'equipment') }}</p>
-                  <div class="coach-v36-slot-box"><h4>{{ lang==='zh'?'可预约时段':'Available Slots' }}</h4><small>{{ lang==='zh'?'点击下方时间段后，可直接在该时间段下方确认预约，无需浏览器弹窗。':'Tap a time chip below. The confirm button appears under the selected slot, so no browser popup is used.' }}</small>
+                  <header><h3>{{ pick(f,'name') }}</h3><span>Available</span></header>
+                  <p>{{ pick(f,'description') }}</p><p><b>Equipment:</b> {{ pick(f,'equipment') }}</p>
+                  <div class="coach-v36-slot-box"><h4>Available Slots</h4><small>Tap a time chip below. The confirm button appears under the selected slot, so no browser popup is used.</small>
                     <div v-for="slot in facilitySlots(f)" :key="slot" class="coach-v37-slot-row">
                       <button type="button" :class="{picked:isFacilitySlotSelected(f,slot)}" @click="selectFacilitySlot(f,slot)">{{ slot.replace('-', ' – ') }}</button>
                       <div v-if="isFacilitySlotSelected(f,slot)" class="coach-v37-slot-confirm">
@@ -549,12 +547,12 @@
                   </div>
                 </article>
               </div>
-              <section class="coach-v36-reserved"><header><h3>{{ lang==='zh'?'我预约的场地':'My Reserved Facilities' }}</h3><button @click="loadCoach">{{ lang==='zh'?'刷新':'Refresh' }}</button></header><article v-for="b in coachFacilityBookings" :key="b.id"><div><b>{{ pickFacilityBooking(b) }}</b><span>{{ b.usedByClass ? (lang==='zh'?'已用于课程创建':'Used by class setup') : (lang==='zh'?'可用于课程创建':'Available for class setup') }}</span></div><button @click="cancelFacilityBooking(b)">{{ lang==='zh'?'删除':'Delete' }}</button></article><p v-if="!coachFacilityBookings.length">{{ lang==='zh'?'暂无已预约场地':'No reserved facility yet' }}</p></section>
+              <section class="coach-v36-reserved"><header><h3>My Reserved Facilities</h3><button @click="loadCoach">Refresh</button></header><article v-for="b in coachFacilityBookings" :key="b.id"><div><b>{{ pickFacilityBooking(b) }}</b><span>{{ b.usedByClass ? 'Used by class setup' : 'Available for class setup' }}</span></div><button @click="cancelFacilityBooking(b)">Delete</button></article><p v-if="!coachFacilityBookings.length">No reserved facility yet</p></section>
             </section>
 
             <section v-else class="coach-v36-panel coach-v36-students">
-              <input v-model="coachStudentSearch" :placeholder="lang==='zh'?'按姓名或手机号搜索':'Search by name or phone'">
-              <article v-for="s in visibleCoachStudents" :key="s.id || s.username"><div class="coach-v36-student-avatar">{{ avatarGlyph(s) }}</div><div><b>{{ s.name }}</b><span>{{ coachMemberTypeLabel(s.membershipType) }} &nbsp; {{ maskPhone(s.phone) }} <em v-if="s.medicalNotes">{{ lang==='zh'?'有健康备注':'Health notes' }}</em> <em class="ok">{{ lang==='zh'?'已到课':'Attended' }}</em></span></div><strong>{{ lang==='zh'?'已到课':'Attended' }}</strong></article>
+              <input v-model="coachStudentSearch" placeholder="Search by name or phone">
+              <article v-for="s in visibleCoachStudents" :key="s.id || s.username"><div class="coach-v36-student-avatar">{{ avatarGlyph(s) }}</div><div><b>{{ s.name }}</b><span>{{ s.membershipType || 'Regular Member' }} &nbsp; {{ maskPhone(s.phone) }} <em v-if="s.medicalNotes">Has Disease</em> <em class="ok">Attended</em></span></div><strong>Attended</strong></article>
             </section>
           </section>
 
@@ -564,7 +562,7 @@
               <section>
                 <h2>{{ lang==='zh'?'投诉建议':'Complaints' }}</h2>
                 <article v-for="c in complaints" :key="c.id">
-                  <b>{{ pick(c,'title') }}</b><em>{{ coachComplaintStatusLabel(c.status) }}</em><p>{{ pick(c,'content') }}</p>
+                  <b>{{ pick(c,'title') }}</b><em>{{ c.status }}</em><p>{{ pick(c,'content') }}</p>
                   <p v-if="c.response" class="coach-v36-mail-reply">↳ {{ pick(c,'response') }}</p>
                   <button @click="openCoachComplaint(c)">{{ lang==='zh'?'处理':'Handle' }}</button>
                 </article>
@@ -584,12 +582,12 @@
         <div v-if="coachEditDialog" class="coach-v36-modal-backdrop" @click.self="coachEditDialog=null">
           <section class="coach-v36-edit-modal">
             <button class="coach-v36-close" @click="coachEditDialog=null">×</button>
-            <h2>{{ lang==='zh'?'编辑课程':'Edit Class' }}</h2>
-            <label>{{ lang==='zh'?'课程名称':'Class Name' }}<input v-model="coachEditDialog.name"></label>
-            <div class="coach-v36-form-row"><label>{{ lang==='zh'?'日期':'Date' }}<input v-model="coachEditDialog.date" type="date"></label><label>{{ lang==='zh'?'开始时间':'Start Time' }}<input v-model="coachEditDialog.startTime" type="time"></label></div>
-            <div class="coach-v36-form-row"><label>{{ lang==='zh'?'结束时间':'End Time' }}<input v-model="coachEditDialog.endTime" type="time"></label></div>
-            <div class="coach-v36-form-row"><label>{{ lang==='zh'?'场地':'Location' }}<select v-model="coachEditDialog.location"><option v-for="f in coachFacilities" :key="f.id" :value="pick(f,'name')">{{ pick(f,'name') }}</option><option :value="coachEditDialog.location">{{ coachEditDialog.location }}</option></select></label><label>{{ lang==='zh'?'容量':'Capacity' }}<input v-model.number="coachEditDialog.capacity" type="number" min="1"></label></div>
-            <footer><button class="ghost" @click="coachEditDialog=null">{{ lang==='zh'?'取消':'Cancel' }}</button><button @click="saveCoachEdit">{{ lang==='zh'?'保存':'Save' }}</button></footer>
+            <h2>Edit Class</h2>
+            <label>Class Name<input v-model="coachEditDialog.name"></label>
+            <div class="coach-v36-form-row"><label>Date<input v-model="coachEditDialog.date" type="date"></label><label>Start Time<input v-model="coachEditDialog.startTime" type="time"></label></div>
+            <div class="coach-v36-form-row"><label>End Time<input v-model="coachEditDialog.endTime" type="time"></label></div>
+            <div class="coach-v36-form-row"><label>Location<select v-model="coachEditDialog.location"><option v-for="f in coachFacilities" :key="f.id" :value="pick(f,'name')">{{ pick(f,'name') }}</option><option :value="coachEditDialog.location">{{ coachEditDialog.location }}</option></select></label><label>Capacity<input v-model.number="coachEditDialog.capacity" type="number" min="1"></label></div>
+            <footer><button class="ghost" @click="coachEditDialog=null">Cancel</button><button @click="saveCoachEdit">Save</button></footer>
           </section>
         </div>
         <div v-if="coachMailDialog" class="coach-v36-modal-backdrop" @click.self="coachMailDialog=null">
@@ -614,7 +612,7 @@
         <label>{{ lang==='zh'?'活动说明':'Description' }}<textarea v-model="teamForm.description" :placeholder="lang==='zh'?'写下集合时间、训练目标和参与要求':'Describe time, goal and requirements'"></textarea></label>
         <div class="clean-modal-grid"><label>{{ lang==='zh'?'分类':'Category' }}<select v-model="teamForm.category"><option value="running">{{ lang==='zh'?'跑步':'Running' }}</option><option value="yoga">{{ lang==='zh'?'瑜伽':'Yoga' }}</option><option value="fitness">{{ lang==='zh'?'健身 / 力量':'Fitness / Strength' }}</option><option value="swimming">{{ lang==='zh'?'游泳':'Swimming' }}</option></select></label><label>{{ lang==='zh'?'人数上限':'Capacity' }}<input type="number" min="2" v-model.number="teamForm.maxMembers" /></label></div>
         <div class="clean-modal-grid"><label>{{ lang==='zh'?'地点':'Location' }}<input v-model="teamForm.location" :placeholder="lang==='zh'?'健身中心A区':'Gym Zone A'" /></label><label>{{ lang==='zh'?'时间':'Meet time' }}<input v-model="teamForm.meetTime" :placeholder="lang==='zh'?'周六 07:00':'Sat 07:00'" /></label></div>
-        <footer><button class="ghost" @click="showTeamModal=false">{{ lang==='zh'?'取消':'Cancel' }}</button><button class="primary" :disabled="socialSubmitting" @click="submitTeamForm">{{ socialSubmitting ? (lang==='zh'?'提交中...':'Submitting...') : (lang==='zh'?'创建组队':'Create Team') }}</button></footer>
+        <footer><button class="ghost" @click="showTeamModal=false">{{ lang==='zh'?'取消':'Cancel' }}</button><button class="primary" @click="submitTeamForm">{{ lang==='zh'?'创建组队':'Create Team' }}</button></footer>
       </section>
     </div>
 
@@ -623,7 +621,7 @@
         <header><h2>📝 {{ lang==='zh'?'发布动态':'Post Update' }}</h2><button @click="showPostModal=false">×</button></header>
         <label>{{ lang==='zh'?'动态分类':'Category' }}<select v-model="postForm.category"><option value="share">{{ lang==='zh'?'分享':'Share' }}</option><option value="help">{{ lang==='zh'?'求助':'Help' }}</option><option value="team">{{ lang==='zh'?'组队':'Team up' }}</option><option value="interaction">{{ lang==='zh'?'互动':'Interaction' }}</option></select></label>
         <label>{{ lang==='zh'?'内容':'Content' }}<textarea v-model="postForm.content" :placeholder="lang==='zh'?'分享你的健身动态...':'Share your fitness update...'"></textarea></label>
-        <footer><button class="ghost" @click="showPostModal=false">{{ lang==='zh'?'取消':'Cancel' }}</button><button class="primary" :disabled="socialSubmitting" @click="submitPostForm">{{ socialSubmitting ? (lang==='zh'?'发布中...':'Posting...') : (lang==='zh'?'发布动态':'Post Update') }}</button></footer>
+        <footer><button class="ghost" @click="showPostModal=false">{{ lang==='zh'?'取消':'Cancel' }}</button><button class="primary" @click="submitPostForm">{{ lang==='zh'?'发布动态':'Post Update' }}</button></footer>
       </section>
     </div>
 
@@ -651,19 +649,17 @@ const AdminTable = defineComponent({
   props: ['rows','lang','mode'], emits:['edit','remove'],
   methods: {
     labelKey(row){ const s=String(row.levelKey||row.membershipType||''); return s.toLowerCase().includes('vip')?'vip':'normal' },
-    label(v){ const s=String(v||''); const vip=s.toLowerCase().includes('vip'); return this.lang==='zh' ? (vip?'VIP会员':'普通会员') : (vip?'VIP Member':'Normal Member') },
-    roleLabel(v){ const isAdmin=String(v||'USER').toUpperCase()==='ADMIN'; return this.lang==='zh' ? (isAdmin?'管理员':'会员') : (isAdmin?'Administrator':'Member') },
-    activeLabel(inactive){ return this.lang==='zh' ? (inactive?'未启用':'启用') : (inactive?'Inactive':'Active') }
+    label(v){ const s=String(v||''); return s.toLowerCase().includes('vip') ? 'VIP Member' : 'Normal Member' },
+    roleLabel(v){ return String(v||'USER').toUpperCase()==='ADMIN'?'Administrator':'Member' }
   },
   render(){
     const rows = Array.isArray(this.rows) ? this.rows : []
     const usersMode = this.mode === 'users'
-    const zh = this.lang === 'zh'
-    const heads = zh ? ['ID','用户名','姓名'] : ['ID','Username','Name']
-    if (usersMode) heads.push(zh ? '手机号' : 'Phone')
-    heads.push(zh ? '邮箱' : 'Email')
-    heads.push(usersMode ? (zh ? '角色' : 'Role') : (zh ? '会员等级' : 'Member Level'))
-    heads.push(zh ? '状态' : 'Status', zh ? '操作' : 'Actions')
+    const heads = ['ID','Username','Name']
+    if (usersMode) heads.push('Phone')
+    heads.push('Email')
+    heads.push(usersMode ? 'Role' : 'Member Level')
+    heads.push('Status','Actions')
     const header = h('thead', [h('tr', heads.map(x => h('th', x)))])
     const body = h('tbody', rows.map(row => {
       const cells = [h('td', row.id), h('td', row.username || ''), h('td', row.name || '')]
@@ -672,10 +668,10 @@ const AdminTable = defineComponent({
       if (usersMode) cells.push(h('td', [h('span', {class:'ft-badge'}, this.roleLabel(row.role))]))
       else cells.push(h('td', [h('span', {class:['ft-badge', this.labelKey(row)]}, this.label(row.levelKey || row.membershipType))]))
       const inactive = row.statusKey === 'inactive' || row.active === false
-      cells.push(h('td', [h('span', {class:['ft-status', inactive ? 'off' : 'on']}, this.activeLabel(inactive))]))
+      cells.push(h('td', [h('span', {class:['ft-status', inactive ? 'off' : 'on']}, inactive ? 'Inactive' : 'Active')]))
       cells.push(h('td', [
-        h('button', {onClick:()=>this.$emit('edit', row)}, this.lang==='zh'?'编辑':'Edit'),
-        h('button', {onClick:()=>this.$emit('remove', row)}, this.lang==='zh'?'删除':'Delete')
+        h('button', {onClick:()=>this.$emit('edit', row)}, 'Edit'),
+        h('button', {onClick:()=>this.$emit('remove', row)}, 'Delete')
       ]))
       return h('tr', {key: row.id}, cells)
     }))
@@ -699,8 +695,8 @@ export default defineComponent({
       profile: {}, classes: [], privateClasses: [], coaches: [], goods: [], products: [], teams: [], ranking: [], calendar: [], bookings: [], bookedIds: [], exchanges: [],
       dash: {}, adminUsers: [], adminReports: [], adminStats: {totalMembers:0,activeMembers:0,newMembers:0},
       coachClasses: [], coachStats:{activeUsers:0}, notifications: [], complaints: [], reviews: [], coachProfile: {}, coachSchedule: [], coachFacilities: [], coachFacilityBookings: [], coachStudents: [], coachSubTab:'mine', coachClassFilter:'all', coachStudentSearch:'', coachEditDialog:null, coachMailDialog:null, coachMailReply:'', coachPendingFacility:null, coachClassForm:{name:'',date:'',startTime:'',endTime:'',reservedBookingId:'',location:'',capacity:20,description:''}, coachNotify:{classReminders:true,bookingAlerts:true,reviewAlerts:true,complaintAlerts:true},
-      newPost:'', selectedPlan:'year', classTab:'group', activeDay:'today', mallFilter:'all', selectedCoach:null, selectedCoachCourses:[], privateCourseLoading:false, profileTab:'basic', userComplaints:[], complaintType:'course', complaintContent:'',
-      socialSort:'hot', socialFilter:'all', rankingPeriod:'total', likedPosts:[], showTeamModal:false, showPostModal:false, socialSubmitting:false, replyTarget:null,
+      newPost:'', selectedPlan:'year', classTab:'group', activeDay:'today', mallFilter:'all', selectedCoach:null, selectedCoachCourses:[], profileTab:'basic', userComplaints:[], complaintType:'course', complaintContent:'',
+      socialSort:'hot', socialFilter:'all', rankingPeriod:'total', likedPosts:[], showTeamModal:false, showPostModal:false, replyTarget:null,
       teamForm:{title:'',description:'',category:'running',location:'',meetTime:'',maxMembers:20},
       postForm:{content:'',category:'share'}, replyText:'', selectedPayment:'wechat', showPayModal:false, adminDialog:null, adminForm:{}, adminClassTab:'group', adminProductSearch:'', adminProductCategory:'all', adminCommunityTab:'posts'
     }
@@ -752,12 +748,7 @@ export default defineComponent({
     },
     filteredAdminProducts(){ const q=String(this.adminProductSearch||'').toLowerCase(); return (this.goods||[]).filter(p=>{ const text=[p.name,p.nameEn,p.description,p.descriptionEn,p.category].join(' ').toLowerCase(); const catOk=this.adminProductCategory==='all' || p.category===this.adminProductCategory; return catOk && (!q || text.includes(q)) }) },
     coachTitle(){ const m=this.coachMenu.find(x=>x.path===this.route); return m ? this.t(m.key) : this.t('coachDashboard') },
-    coachNotifyRows(){ return this.lang==='zh' ? [
-      {key:'classReminders',title:'课程提醒',desc:'课程开始前提醒'},
-      {key:'bookingAlerts',title:'预约提醒',desc:'会员预约或取消课程时提醒'},
-      {key:'reviewAlerts',title:'评价提醒',desc:'收到新的课程评价时提醒'},
-      {key:'complaintAlerts',title:'投诉提醒',desc:'收到投诉或建议时提醒'}
-    ] : [
+    coachNotifyRows(){ return [
       {key:'classReminders',title:'Class reminders',desc:'Remind you before classes start'},
       {key:'bookingAlerts',title:'Booking alerts',desc:'When members book or cancel'},
       {key:'reviewAlerts',title:'Review alerts',desc:'When you receive a new review'},
@@ -771,20 +762,15 @@ export default defineComponent({
     visibleCoachStudents(){ const q=String(this.coachStudentSearch||'').toLowerCase(); return (this.coachStudents||[]).filter(s=>!q || [s.name,s.username,s.phone].join(' ').toLowerCase().includes(q)) },
     shortClasses(){ return this.classes.slice(0, 3) },
     firstClass(){ return this.classes[0] || {} },
-    groupClassCount(){ return (this.classes||[]).filter(c=>String(c.type||'GROUP').toUpperCase()!=='PRIVATE').length || 0 },
+    groupClassCount(){ return this.classes.length || 5 },
     bookedClassCount(){ return this.bookings.length },
-    coachCount(){ return this.privateCoaches.length },
-    privateCoaches(){
-      const fallback=[
-        {id:1,name:'张教练',avatar:'👨‍🏫',specialty:'力量训练,增肌,功能性训练',rating:'4.8',experienceYears:5,hourlyRate:300},
-        {id:2,name:'李教练',avatar:'🧘',specialty:'瑜伽,普拉提,拉伸',rating:'4.9',experienceYears:6,hourlyRate:350},
-        {id:3,name:'王教练',avatar:'🚴',specialty:'减脂,康复,体态矫正',rating:'5',experienceYears:7,hourlyRate:400},
-        {id:4,name:'赵教练',avatar:'🥊',specialty:'散打搏击,爆发力,功能性训练',rating:'5',experienceYears:8,hourlyRate:450}
-      ]
-      const rows=(this.coaches.length ? this.coaches : fallback).filter(c=>c && c.id)
-      const seen=new Set()
-      return rows.filter(c=>{ const key=String(c.id); if(seen.has(key)) return false; seen.add(key); return true })
-    },
+    coachCount(){ return this.coaches.length || 4 },
+    privateCoaches(){ return (this.coaches.length ? this.coaches : [
+      {id:1,name:'张教练',avatar:'👨‍🏫',specialty:'力量训练,增肌,功能性训练',rating:'4.8',experienceYears:5,hourlyRate:300},
+      {id:2,name:'李教练',avatar:'🧘',specialty:'瑜伽,普拉提,拉伸',rating:'4.9',experienceYears:6,hourlyRate:350},
+      {id:3,name:'王教练',avatar:'🚴',specialty:'减脂,康复,体态矫正',rating:'5',experienceYears:7,hourlyRate:400},
+      {id:4,name:'赵教练',avatar:'🥊',specialty:'散打搏击,爆发力,功能性训练',rating:'5',experienceYears:8,hourlyRate:450}
+    ]).slice(0,4) },
     bookingDays(){ const base=new Date(); const names=this.lang==='zh'?['今天','明天','周一','周二','周三','周四','周五']:['Today','Tomorrow','Mon','Tue','Wed','Thu','Fri']; return Array.from({length:7},(_,i)=>{const d=new Date(base); d.setDate(base.getDate()+i); return {key:i===0?'today':'d'+i,label:names[i],date:(d.getMonth()+1)+'/'+d.getDate()}}) },
     groupDisplayClasses(){ const all=(this.classes||[]).filter(c=>String(c.type||'GROUP').toUpperCase()!=='PRIVATE'); const day=this.activeDateKey(); let rows=all.filter(c=>this.itemDateKey(c)===day); if(!rows.length && this.activeOffset()===0) rows=all.slice(0,3); return rows.slice(0,8) },
     filteredBookings(){ const day=this.activeDateKey(); return (this.bookings||[]).filter(b=>this.itemDateKey(b.classes||b)===day) },
@@ -885,9 +871,9 @@ export default defineComponent({
         const isFormData=typeof FormData!=='undefined' && opts.body instanceof FormData
         const {timeout:ignoredTimeout, headers:customHeaders, noDedup:ignoredNoDedup, ...fetchOptions}=opts
         const headers={...(isFormData?{}:{'Content-Type':'application/json'}),...(this.token?{Authorization:'Bearer '+this.token}:{}),...(customHeaders||{})}
-        const requestOnce=async (base, perRequestTimeout=timeout)=>{
+        const requestOnce=async (base)=>{
           const controller=new AbortController()
-          const timer=setTimeout(()=>controller.abort(), perRequestTimeout)
+          const timer=setTimeout(()=>controller.abort(), timeout)
           try{
             const res=await fetch(base+path,{...fetchOptions,signal:controller.signal,headers})
             const text=await res.text()
@@ -898,25 +884,27 @@ export default defineComponent({
             return data
           } finally { clearTimeout(timer) }
         }
-        const direct=this.directApiBase()
-        const isAuthRequest=path.includes('/login') || path.includes('/auth/register')
-        // On the Vite dev server, repeated role switching can leave the proxy request waiting
-        // while the real Spring Boot service is already available. For login/register we try
-        // the real 8080 API first, then fall back to the proxied /api path.
-        const bases=direct ? [direct, this.apiBase()] : [this.apiBase()]
-        let firstFailure=null
-        for(const base of bases){
-          try{
-            const out=await requestOnce(base, isAuthRequest ? Math.min(timeout, 4500) : timeout)
-            if(out && out.success!==false) return out
-            if(!firstFailure) firstFailure=out
-            // Business failures such as wrong password should not be retried against another base.
-            if(out && out.message && !String(out.message).includes('超时') && !String(out.message).includes('timeout') && !String(out.message).includes('无法连接') && !String(out.message).includes('Cannot connect')) return out
-          }catch(e){
-            if(!firstFailure) firstFailure={success:false,error:String(e),message:e && e.name==='AbortError' ? (this.lang==='zh'?'请求超时，请确认 Spring Boot 8080 已启动':'Request timed out. Please check Spring Boot 8080 is running') : (this.lang==='zh'?'无法连接后端服务，请确认 8080 已启动':'Cannot connect to backend service. Please confirm port 8080 is running')}
+        try{
+          const first=await requestOnce(this.apiBase())
+          if(first && first.success!==false) return first
+          const direct=this.directApiBase()
+          if(direct){
+            const retry=await requestOnce(direct)
+            if(retry && retry.success!==false) return retry
+            return retry && retry.message ? retry : first
           }
+          return first
+        }catch(e){
+          try{
+            const direct=this.directApiBase()
+            if(direct) return await requestOnce(direct)
+          }catch(e2){
+            const msg=e2 && e2.name==='AbortError' ? (this.lang==='zh'?'请求超时，请确认 Spring Boot 8080 已启动、MySQL 密码为 lnj031212':'Request timed out. Please check Spring Boot 8080 and MySQL password lnj031212') : (this.lang==='zh'?'无法连接后端服务，请确认 8080 已启动':'Cannot connect to backend service. Please confirm port 8080 is running')
+            return {success:false,message:msg,error:String(e2)}
+          }
+          const msg=e && e.name==='AbortError' ? (this.lang==='zh'?'请求超时，请确认 Spring Boot 8080 已启动、MySQL 密码为 lnj031212':'Request timed out. Please check Spring Boot 8080 and MySQL password lnj031212') : (this.lang==='zh'?'无法连接后端服务，请确认 8080 已启动':'Cannot connect to backend service. Please confirm port 8080 is running')
+          return {success:false,message:msg,error:String(e)}
         }
-        return firstFailure || {success:false,message:this.lang==='zh'?'无法连接后端服务，请确认 8080 已启动':'Cannot connect to backend service. Please confirm port 8080 is running'}
       })()
       if(inFlightKey){
         this.apiInFlight[inFlightKey]=run
@@ -927,8 +915,6 @@ export default defineComponent({
     async submitAuth(){
       if(this.authLoading) return
       this.message=''
-      const loginRunId=Date.now()+':'+Math.random().toString(36).slice(2)
-      this._loginRunId=loginRunId
       this.authLoading=true
       try{
         const kind=this.currentLoginKind()
@@ -938,8 +924,7 @@ export default defineComponent({
         if(this.route==='/user/register'){ url='/api/auth/register'; body={...this.loginForm} }
         if(this.route==='/admin/login'){ url='/api/admin/auth/login'; body={username:(this.loginForm.username || defaults.username).trim(), password:this.loginForm.password || defaults.password} }
         if(this.route==='/coach/login'){ url='/api/coach/login'; body={username:(this.loginForm.username || defaults.username).trim(), password:this.loginForm.password || defaults.password} }
-        const out=await this.api(url,{method:'POST',body:JSON.stringify(body),timeout:6000})
-        if(this._loginRunId!==loginRunId) return
+        const out=await this.api(url,{method:'POST',body:JSON.stringify(body),timeout:7000})
         if(!out.success){ this.message=out.message || (this.lang==='zh'?'登录失败':'Login failed'); return }
         const token=out.token || out.data?.token || out.data?.accessToken || ''
         const name=out.username || out.data?.username || body.username
@@ -958,9 +943,9 @@ export default defineComponent({
         return
       }catch(e){
         console.error(e)
-        if(this._loginRunId===loginRunId) this.message=this.lang==='zh'?'无法连接后端服务':'Cannot connect to backend service'
+        this.message=this.lang==='zh'?'无法连接后端服务':'Cannot connect to backend service'
       }finally{
-        if(this._loginRunId===loginRunId) this.authLoading=false
+        this.authLoading=false
       }
     },
     async load(){
@@ -1042,7 +1027,7 @@ export default defineComponent({
       }
       try{ const status=await this.api('/api/checkin/status'); const st=status.data||{}; this.dash.streak=st.consecutiveDays||st.streakDays||this.dash.streak||0; this.dash.badges=[1,7,30,100].filter(x=>Number(this.dash.streak)>=x).length || (this.dash.streak>0?1:0) }catch(e){}
     },
-    async loadUserComplaints(){ try{ const o=await this.api('/api/complaints/user'); if(Array.isArray(o.data)) this.userComplaints=o.data }catch(e){ /* keep existing complaints on transient failure */ } },
+    async loadUserComplaints(){ try{ const o=await this.api('/api/complaints/user'); this.userComplaints=Array.isArray(o.data)?o.data:[] }catch(e){ this.userComplaints=[] } },
     async loadAdmin(){
       const [u,r,c,p,po]=await Promise.allSettled([
         this.api('/api/admin/users'),
@@ -1052,13 +1037,12 @@ export default defineComponent({
         this.api('/api/admin/posts')
       ])
       const uv=u.value||{}
-      if(Array.isArray(uv.data)) this.adminUsers=uv.data
-      if(uv.stats) this.adminStats=uv.stats
-      else if(!this.adminStats || !Object.keys(this.adminStats).length) this.adminStats={totalMembers:this.adminUsers.length,activeMembers:this.adminUsers.filter(x=>x.active!==false).length,newMembers:3}
-      if(Array.isArray(r.value?.data)) this.adminReports=r.value.data
-      if(Array.isArray(c.value?.data)) this.classes=c.value.data.map(x=>this.withBookingFlag(x))
-      if(Array.isArray(p.value?.data)) this.goods=p.value.data
-      if(Array.isArray(po.value?.data)) this.posts=po.value.data
+      this.adminUsers=Array.isArray(uv.data)?uv.data:[]
+      this.adminStats=uv.stats||{totalMembers:this.adminUsers.length,activeMembers:this.adminUsers.filter(x=>x.active!==false).length,newMembers:3}
+      this.adminReports=Array.isArray(r.value?.data)?r.value.data:[]
+      this.classes=Array.isArray(c.value?.data)?c.value.data.map(x=>this.withBookingFlag(x)):[]
+      this.goods=Array.isArray(p.value?.data)?p.value.data:[]
+      this.posts=Array.isArray(po.value?.data)?po.value.data:[]
       await Promise.allSettled([this.loadTrainers()])
     },
     async loadCoach(){
@@ -1171,28 +1155,18 @@ export default defineComponent({
         this.setBookingBusy(c,false)
       }
     },
-    privateCoachFallbackRows(coach){
-      let rows=(this.classes||[]).filter(c=>String(c.type||'').toUpperCase().includes('PRIVATE') && (String(c.coachId)===String(coach.id) || String(c.coachName||'')===String(coach.name||'')))
+    async openCoachCourses(coach){
+      this.selectedCoach=coach
+      const o=await this.api(`/api/trainers/${coach.id}/courses`)
+      let rows=Array.isArray(o.data)?o.data:[]
+      if(!rows.length){
+        rows=(this.classes||[]).filter(c=>String(c.type||'').toUpperCase().includes('PRIVATE') && (String(c.coachId)===String(coach.id) || String(c.coachName||'')===String(coach.name||'')))
+      }
       if(!rows.length){
         const start=new Date(); start.setDate(start.getDate()+1); start.setHours(16,0,0,0); const end=new Date(start.getTime()+3600000)
         rows=[{id:'demo-private-'+coach.id,name:'私教体验课',nameEn:'Private Coaching Trial',coachId:coach.id,coachName:coach.name,location:'私教区-'+coach.name,locationEn:'Private Zone - '+coach.name,capacity:1,bookedCount:0,type:'PRIVATE',startTime:start.toISOString().slice(0,19),endTime:end.toISOString().slice(0,19),duration:this.lang==='zh'?'60分钟':'60 min'}]
       }
-      return rows
-    },
-    async openCoachCourses(coach){
-      this.selectedCoach=coach
-      this.selectedCoachCourses=[]
-      this.privateCourseLoading=true
-      try{
-        const o=await this.api(`/api/trainers/${coach.id}/courses`,{noDedup:true,timeout:8000})
-        let rows=Array.isArray(o.data)?o.data:[]
-        if(!rows.length) rows=this.privateCoachFallbackRows(coach)
-        this.selectedCoachCourses=rows.map(c=>this.withBookingFlag(c))
-      }catch(e){
-        this.selectedCoachCourses=this.privateCoachFallbackRows(coach).map(c=>this.withBookingFlag(c))
-      }finally{
-        this.privateCourseLoading=false
-      }
+      this.selectedCoachCourses=rows.map(c=>this.withBookingFlag(c))
     },
     async refreshBookingState(){
       const currentCoach=this.selectedCoach
@@ -1267,40 +1241,8 @@ export default defineComponent({
     async createPost(){ if(!this.newPost.trim()) return; await this.api('/api/posts',{method:'POST',body:JSON.stringify({content:this.newPost,category:'share'})}); this.newPost=''; await this.loadSocial() },
     openPostDialog(){ this.postForm={content:'',category:'share'}; this.showPostModal=true },
     openTeamDialog(){ this.teamForm={title:'',description:'',category:'running',location:this.lang==='zh'?'FitLife健身房':'FitLife Gym',meetTime:this.lang==='zh'?'周末 09:00':'Weekend 09:00',maxMembers:20}; this.showTeamModal=true },
-    async submitPostForm(){
-      if(this.socialSubmitting) return
-      if(!this.postForm.content.trim()){ this.message=this.lang==='zh'?'请输入动态内容':'Please enter content'; return }
-      this.socialSubmitting=true
-      try{
-        const payload={content:this.postForm.content.trim(),category:this.postForm.category}
-        const out=await this.api('/api/posts',{method:'POST',body:JSON.stringify(payload)})
-        if(out.success===false){ this.message=out.message || (this.lang==='zh'?'发布失败':'Post failed'); return }
-        const created=out.data || out
-        if(created && created.id){
-          const exists=this.posts.some(p=>String(p.id)===String(created.id))
-          if(!exists) this.posts=[{...created,replies:Array.isArray(created.replies)?created.replies:[]}, ...this.posts]
-        }
-        // Make the newly published update visible immediately in Activity Feed.
-        // Hot sorting can push a 0-like new post behind older popular posts,
-        // which looked like the post was missing even though the admin side had saved it.
-        this.socialFilter='all'
-        this.socialSort='latest'
-        this.showPostModal=false
-        this.message=this.lang==='zh'?'发布成功':'Posted successfully'
-        try{ await this.loadSocial() }catch(e){ /* keep optimistic post visible */ }
-      }finally{ this.socialSubmitting=false }
-    },
-    async submitTeamForm(){
-      if(this.socialSubmitting) return
-      if(!this.teamForm.title.trim()){ this.message=this.lang==='zh'?'请输入组队名称':'Please enter team name'; return }
-      this.socialSubmitting=true
-      try{
-        const payload={...this.teamForm, description:this.teamForm.description || (this.lang==='zh'?'一起训练，一起进步！':'Train together and improve together!')}
-        const out=await this.api('/api/teams',{method:'POST',body:JSON.stringify(payload)})
-        if(out.success===false){ this.message=out.message || (this.lang==='zh'?'创建失败':'Create failed'); return }
-        this.showTeamModal=false; await this.loadSocial(); this.message=this.lang==='zh'?'创建成功':'Created successfully'
-      }finally{ this.socialSubmitting=false }
-    },
+    async submitPostForm(){ if(!this.postForm.content.trim()){ this.message=this.lang==='zh'?'请输入动态内容':'Please enter content'; return } await this.api('/api/posts',{method:'POST',body:JSON.stringify({content:this.postForm.content,category:this.postForm.category})}); this.showPostModal=false; await this.loadSocial(); this.message=this.lang==='zh'?'发布成功':'Posted successfully' },
+    async submitTeamForm(){ if(!this.teamForm.title.trim()){ this.message=this.lang==='zh'?'请输入组队名称':'Please enter team name'; return } const payload={...this.teamForm, description:this.teamForm.description || (this.lang==='zh'?'一起训练，一起进步！':'Train together and improve together!')}; await this.api('/api/teams',{method:'POST',body:JSON.stringify(payload)}); this.showTeamModal=false; await this.loadSocial(); this.message=this.lang==='zh'?'创建成功':'Created successfully' },
     teamButtonText(team){ if(team.createdByCurrentUser) return this.lang==='zh'?'✓ 我创建的':'✓ Created by me'; if(team.joined) return this.lang==='zh'?'退出组队':'Leave Team'; return this.lang==='zh'?'加入组队':'Join Team' },
     teamButtonClass(team){ return team.createdByCurrentUser?'mine':(team.joined?'leave':'join') },
     async toggleTeam(team){
@@ -1440,9 +1382,9 @@ export default defineComponent({
       if(mode==='add') this.adminForm={name:'',nameEn:'',category:'Equipment',pointsCost:100,stockQuantity:100,description:'',descriptionEn:'',imageKey:'gift',active:true}
       else this.adminForm={id:row.id,name:row.name||'',nameEn:row.nameEn||'',category:row.category||'Equipment',pointsCost:row.pointsCost||row.points||100,stockQuantity:row.stockQuantity||row.stock||100,description:row.description||'',descriptionEn:row.descriptionEn||'',imageKey:row.imageKey||row.icon||'gift',active:row.active!==false}
     },
-    openAdminPostDialog(row){ this.adminDialog={mode:'edit',kind:'post',row}; this.adminForm={id:row.id,category:row.category||'share',content:row.content||'',visible:row.visible!==false} },
-    adminPostCategoryLabel(v){ const x=String(v||'chat').toLowerCase(); const zh=this.lang==='zh'; if(x.includes('share')) return zh?'📥 分享':'📥 Share'; if(x.includes('help')) return zh?'❓ 求助':'❓ Help'; if(x.includes('team')) return zh?'👥 组队':'👥 Team'; if(x.includes('checkin')) return zh?'✅ 打卡':'checkin'; return zh?'💬 互动':'💬 Chat' },
-    reportStatusLabel(v){ const x=String(v||'PENDING').toUpperCase(); const zh=this.lang==='zh'; if(x.includes('PROCESSED')||x.includes('RESOLVED')) return zh?'已处理':'Resolved'; if(x.includes('IGNORED')) return zh?'已忽略':'Dismissed'; return zh?'待处理':'Pending' },
+    openPostDialog(row){ this.adminDialog={mode:'edit',kind:'post',row}; this.adminForm={id:row.id,category:row.category||'share',content:row.content||'',visible:row.visible!==false} },
+    adminPostCategoryLabel(v){ const x=String(v||'chat').toLowerCase(); if(x.includes('share')) return '📥 Share'; if(x.includes('help')) return '❓ Help'; if(x.includes('team')) return '👥 Team'; if(x.includes('checkin')) return 'checkin'; return '💬 Chat' },
+    reportStatusLabel(v){ const x=String(v||'PENDING').toUpperCase(); if(x.includes('PROCESSED')||x.includes('RESOLVED')) return 'Resolved'; if(x.includes('IGNORED')) return 'Dismissed'; return 'Pending' },
     async quickAddProduct(){ this.openProductDialog('add') },
     async quickEditProduct(p){ this.openProductDialog('edit',p) },
     async adminDeleteClass(c){ if(confirm(this.lang==='zh'?'删除这个课程？':'Delete this class?')){ await this.api(`/api/admin/classes/${c.id}`,{method:'DELETE'}); await this.loadAdmin(); this.message=this.lang==='zh'?'已删除':'Deleted' } },
@@ -1451,18 +1393,16 @@ export default defineComponent({
     async ignoreAdminReport(r){ await this.api(`/api/admin/reports/${r.id}/ignore`,{method:'POST'}); await this.loadAdmin(); this.message=this.lang==='zh'?'已忽略举报':'Report ignored' },
     async deletePost(p){ await this.api(`/api/admin/posts/${p.id}`,{method:'DELETE'}); await this.loadAdmin() },
     coachNavLabel(item){
-      const zh={ '/coach/dashboard':'仪表盘', '/coach/profile':'个人中心', '/coach/classes':'课程管理', '/coach/mailbox':'教练邮箱' }
-      const en={ '/coach/dashboard':'Dashboard', '/coach/profile':'My Profile', '/coach/classes':'Classes', '/coach/mailbox':'Coach Mailbox' }
-      const map=this.lang==='zh'?zh:en
+      const map={
+        '/coach/dashboard':'Dashboard', '/coach/profile':'My Profile', '/coach/classes':'Classes', '/coach/mailbox':'Coach Mailbox'
+      }
       return map[item.path] || this.t(item.key)
     },
     coachClassStatusKey(c){ const end=new Date(c.endTime||c.startTime||0); return (!Number.isNaN(end.getTime()) && end < new Date()) ? 'completed' : 'upcoming' },
-    coachClassStatusLabel(c){ return this.coachClassStatusKey(c)==='completed' ? (this.lang==='zh'?'已完成':'Completed') : (this.lang==='zh'?'未开始':'Upcoming') },
+    coachClassStatusLabel(c){ return this.coachClassStatusKey(c)==='completed' ? 'Completed' : 'Upcoming' },
     coachClassStatusClass(c){ return this.coachClassStatusKey(c)==='completed' ? 'done' : 'ready' },
-    coachComplaintStatusLabel(v){ const s=String(v||'PENDING').toLowerCase(); if(s.includes('process')||s.includes('resolved')||s.includes('done')) return this.lang==='zh'?'已处理':'Processed'; if(s.includes('replied')||s.includes('reply')) return this.lang==='zh'?'已回复':'Replied'; return this.lang==='zh'?'待处理':'Pending' },
     coachDisplayTime(c){ const s=String(c?.startTime||''); const e=String(c?.endTime||''); return s ? `${s.slice(11,16)}-${e.slice(11,16) || ''}` : '09:00-10:00' },
     maskPhone(v){ const s=String(v||''); return s.length>7 ? s.slice(0,3)+'****'+s.slice(-4) : s },
-    coachMemberTypeLabel(v){ const raw=String(v||'Regular Member'); if(this.lang!=='zh') return raw; if(/vip/i.test(raw)) return 'VIP会员'; if(/regular|normal/i.test(raw)) return '普通会员'; return raw },
     facilitySlots(f){
       const slots=Array.isArray(f.timeSlots)?f.timeSlots:(Array.isArray(f.slots)?f.slots:['09:00-11:00','14:00-16:00','19:00-21:00'])
       const booked=new Set((this.coachFacilityBookings||[]).filter(b=>String(b.status||'RESERVED').toUpperCase()!=='CANCELLED' && Number(b.facilityId)===Number(f.id)).map(b=>String(b.timeSlot||`${b.startTime}-${b.endTime}`).replace(/\s/g,'')))
@@ -1503,7 +1443,7 @@ export default defineComponent({
       await this.loadCoach()
     },
     resetCoachClassForm(){
-      this.coachClassForm={name:'',date:'',startTime:'',endTime:'',reservedBookingId:'',location:'',capacity:20,description:''}
+      if(!this.coachClassForm || this.coachClassForm.name) this.coachClassForm={name:'',date:'',startTime:'',endTime:'',reservedBookingId:'',location:'',capacity:20,description:''}
     },
     chooseReservedFacility(){
       const b=(this.coachFacilityBookings||[]).find(x=>String(x.id)===String(this.coachClassForm.reservedBookingId))

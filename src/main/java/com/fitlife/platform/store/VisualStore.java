@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class VisualStore {
-    private static final String STATE_KEY = "fitlife-v59-final-checked-state";
+    private static final String STATE_KEY = "fitlife-v49-rich-database-state";
 
     @Autowired(required = false)
     private JdbcTemplate jdbcTemplate;
@@ -533,7 +533,7 @@ public class VisualStore {
             Map<String, Object> coach = coaches.get(Math.max(0, Math.min(coaches.size() - 1, Integer.parseInt(t[4]) - 1)));
             LocalDateTime start = today.plusDays(i % 6).atTime(Integer.parseInt(t[5]), 0);
             classes.add(m("id", 101L + i, "name", t[0], "nameEn", t[1], "location", t[2], "locationEn", t[3],
-                    "capacity", 3, "bookedCount", i % 3 == 0 ? 1 : 0, "startTime", start.toString(), "endTime", start.plusMinutes(60).toString(),
+                    "capacity", 1, "bookedCount", i % 3 == 0 ? 1 : 0, "startTime", start.toString(), "endTime", start.plusMinutes(60).toString(),
                     "status", "ACTIVE", "coachId", coach.get("id"), "coachName", coach.get("name"), "instructor", coach.get("name"), "type", "PRIVATE", "duration", "60分钟"));
         }
     }
@@ -575,37 +575,24 @@ public class VisualStore {
         }
     }
 
-    private boolean coachHasPrivateClass(Map<String, Object> coach) {
-        Long coachId = asLong(coach.get("id"));
-        String coachName = str(coach.get("name"), "");
-        synchronized (classes) {
-            for (Map<String, Object> c : classes) {
-                String type = str(c.get("type"), "").toUpperCase(Locale.ROOT);
-                boolean privateClass = type.contains("PRIVATE") || str(c.get("location"), "").contains("私教") || str(c.get("name"), "").contains("私教");
-                if (!privateClass) continue;
-                boolean byId = Objects.equals(asLong(c.get("coachId")), coachId);
-                boolean byName = coachName.length() > 0 && coachName.equals(str(c.get("coachName"), ""));
-                if (byId || byName) return true;
-            }
-        }
-        return false;
-    }
-
     private void seedDefaultPrivateClassesIfMissing() {
         if (coaches.isEmpty()) seedCoaches();
-        String[] privateNames = {"一对一力量评估", "普拉提私教", "燃脂训练计划", "搏击私教体验", "游泳技术纠正", "舞蹈塑形私教"};
-        String[] privateEn = {"Private Strength Assessment", "Private Pilates Coaching", "Private Fat Loss Plan", "Private Boxing Trial", "Private Swim Technique", "Private Dance Shaping"};
-        String[] privateLocations = {"私教训练室1", "私教训练室2", "私教训练室3", "私教训练室4", "恒温泳池私教区", "舞蹈私教区"};
-        synchronized (coaches) {
-            for (int i = 0; i < coaches.size(); i++) {
-                Map<String, Object> coach = coaches.get(i);
-                if (coachHasPrivateClass(coach)) continue;
-                LocalDateTime start = LocalDate.now().plusDays(1 + (i % 6)).atTime(16 + (i % 3), 0);
-                classes.add(m("id", nextId(), "name", privateNames[i % privateNames.length], "nameEn", privateEn[i % privateEn.length],
-                        "location", privateLocations[i % privateLocations.length], "locationEn", "Private Zone - " + coach.get("name"),
-                        "capacity", 3, "bookedCount", 0, "startTime", start.toString(), "endTime", start.plusMinutes(60).toString(),
-                        "status", "ACTIVE", "coachId", coach.get("id"), "coachName", coach.get("name"), "instructor", coach.get("name"), "type", "PRIVATE", "duration", "60分钟"));
+        String[] privateNames = {"一对一力量评估", "普拉提私教", "燃脂训练计划", "搏击私教体验"};
+        String[] privateEn = {"Private Coaching 1", "Private Coaching 2", "Private Coaching 3", "Private Coaching 4"};
+        for (int i = 0; i < privateNames.length && i < coaches.size(); i++) {
+            Map<String, Object> coach = coaches.get(i);
+            boolean exists = false;
+            synchronized (classes) {
+                for (Map<String, Object> c : classes) {
+                    String type = str(c.get("type"), "").toUpperCase(Locale.ROOT);
+                    if ((type.contains("PRIVATE") || asInt(c.get("capacity"), 0) <= 1) && Objects.equals(asLong(c.get("coachId")), asLong(coach.get("id")))) { exists = true; break; }
+                }
             }
+            if (exists) continue;
+            LocalDateTime start = LocalDate.now().plusDays(1 + i).atTime(16, 0).plusHours(i);
+            classes.add(m("id", nextId(), "name", privateNames[i], "nameEn", privateEn[i], "location", "私教区-" + coach.get("name"), "locationEn", "Private Zone - " + coach.get("name"),
+                    "capacity", 1, "bookedCount", 0, "startTime", start.toString(), "endTime", start.plusMinutes(60).toString(),
+                    "status", "ACTIVE", "coachId", coach.get("id"), "coachName", coach.get("name"), "instructor", coach.get("name"), "type", "PRIVATE", "duration", "60分钟"));
         }
     }
 
@@ -742,7 +729,7 @@ public class VisualStore {
             changed |= addCoachDemoClass(coachOne, "功能训练小组课", "Functional Training", "Training Zone A", "Training Zone A", today.plusDays(1).atTime(16, 0), 18, "GROUP");
         }
         if (!hasCoachClass(coachOneId, true)) {
-            changed |= addCoachDemoClass(coachOne, "一对一力量评估", "Private Strength Assessment", "私教训练室1", "Private Training Room 1", today.plusDays(1).atTime(14, 0), 3, "PRIVATE");
+            changed |= addCoachDemoClass(coachOne, "一对一力量评估", "Private Strength Assessment", "私教训练室1", "Private Training Room 1", today.plusDays(1).atTime(14, 0), 1, "PRIVATE");
         }
         if (!hasCoachClassToday(coachOneId)) {
             changed |= addCoachDemoClass(coachOne, "今日力量循环课", "Today Strength Circuit", "C区力量区", "Zone C — Strength", today.atTime(15, 0), 20, "GROUP");
@@ -773,16 +760,8 @@ public class VisualStore {
             for (Map<String, Object> c : classes) {
                 Long classId = asLong(c.get("id"));
                 int oldCount = asInt(c.get("bookedCount"), 0);
-                int confirmedCount = confirmedCounts.getOrDefault(classId, 0);
-                boolean isPrivate = "PRIVATE".equalsIgnoreCase(str(c.get("type"), "")) || str(c.get("location"), "").contains("私教") || str(c.get("name"), "").contains("私教");
-                if (isPrivate) {
-                    int minCapacity = Math.max(3, confirmedCount + 1);
-                    if (asInt(c.get("capacity"), 0) < minCapacity) { c.put("capacity", minCapacity); changed = true; }
-                    if (oldCount != confirmedCount) { c.put("bookedCount", confirmedCount); changed = true; }
-                } else {
-                    int newCount = Math.max(oldCount, confirmedCount);
-                    if (newCount != oldCount) { c.put("bookedCount", newCount); changed = true; }
-                }
+                int newCount = Math.max(oldCount, confirmedCounts.getOrDefault(classId, 0));
+                if (newCount != oldCount) { c.put("bookedCount", newCount); changed = true; }
             }
         }
         synchronized (users) {
@@ -798,9 +777,7 @@ public class VisualStore {
         if (users.isEmpty()) { seedUsers(); changed = true; }
         if (coaches.isEmpty()) { seedCoaches(); changed = true; }
         if (classCountByKind(false) == 0) { seedDefaultGroupClassesIfMissing(); changed = true; }
-        int privateBefore = classCountByKind(true);
-        seedDefaultPrivateClassesIfMissing();
-        if (classCountByKind(true) != privateBefore) changed = true;
+        if (classCountByKind(true) == 0) { seedDefaultPrivateClassesIfMissing(); changed = true; }
         changed |= normalizeCoachClassRelationsAndBookings();
         if (pointProducts.isEmpty() || pointProducts.size() < 6) { products.clear(); pointProducts.clear(); seedProducts(); changed = true; }
         if (posts.isEmpty() || teams.isEmpty()) { if (posts.isEmpty() && teams.isEmpty()) seedSocial(); else { posts.clear(); teams.clear(); ads.clear(); reports.clear(); postComments.clear(); seedSocial(); } changed = true; }
@@ -1048,20 +1025,16 @@ public class VisualStore {
     }
 
     public List<Map<String, Object>> myBookings(String username) {
-        // Copy matching booking rows first and resolve classes after releasing the booking lock.
-        // This keeps booking mutations responsive when class lists are being refreshed.
-        List<Map<String, Object>> bookingCopies = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
         synchronized (bookings) {
             for (Map<String, Object> b : bookings) {
                 if (!username.equals(b.get("username"))) continue;
                 if (!"CONFIRMED".equalsIgnoreCase(str(b.get("status"), "CONFIRMED"))) continue;
-                bookingCopies.add(new LinkedHashMap<String, Object>(b));
+                Map<String, Object> c = classById(asLong(b.get("classId")));
+                Map<String, Object> copy = new LinkedHashMap<String, Object>(b);
+                copy.put("classes", c);
+                out.add(copy);
             }
-        }
-        List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
-        for (Map<String, Object> copy : bookingCopies) {
-            copy.put("classes", classById(asLong(copy.get("classId"))));
-            out.add(copy);
         }
         return out;
     }

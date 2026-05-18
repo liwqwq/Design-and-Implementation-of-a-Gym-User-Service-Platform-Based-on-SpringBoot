@@ -129,18 +129,14 @@ public class ApiController {
     }
 
     private List<Map<String, Object>> classViews(List<Map<String, Object>> source, String username, String type, String date) {
-        // Copy the class rows first, then compute booking flags outside the class-list lock.
-        // This prevents class-list -> booking-list lock nesting during refreshes.
-        List<Map<String, Object>> sourceCopy;
-        synchronized (source) {
-            sourceCopy = new ArrayList<Map<String, Object>>(source);
-        }
         List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
-        for (Map<String, Object> c : sourceCopy) {
-            if (type != null && !type.equals(c.get("type"))) continue;
-            Map<String, Object> v = classView(c, username);
-            if (date != null && date.trim().length() > 0 && !date.equals(v.get("classDate"))) continue;
-            out.add(v);
+        synchronized (source) {
+            for (Map<String, Object> c : source) {
+                if (type != null && !type.equals(c.get("type"))) continue;
+                Map<String, Object> v = classView(c, username);
+                if (date != null && date.trim().length() > 0 && !date.equals(v.get("classDate"))) continue;
+                out.add(v);
+            }
         }
         return out;
     }
@@ -251,9 +247,7 @@ public class ApiController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, Object> body) {
-        // Login must stay lightweight: seed/repair work is done during startup and normal data APIs.
-        // Running the full operational repair here can block the login button when users switch roles repeatedly.
-        
+        store.ensureOperationalData();
         String username = store.str(body.get("username"), "");
         String password = store.str(body.get("password"), "");
         Map<String, Object> user = store.userByUsername(username);
@@ -304,9 +298,7 @@ public class ApiController {
 
     @PostMapping("/admin/auth/login")
     public ResponseEntity<Map<String, Object>> adminLogin(@RequestBody Map<String, Object> body) {
-        // Login must stay lightweight: seed/repair work is done during startup and normal data APIs.
-        // Running the full operational repair here can block the login button when users switch roles repeatedly.
-        
+        store.ensureOperationalData();
         String username = store.str(body.get("username"), "");
         String password = store.str(body.get("password"), "");
         if (!"admin".equals(username) || !"admin123".equals(password)) return fail("管理员账号或密码错误");
@@ -322,9 +314,7 @@ public class ApiController {
 
     @PostMapping("/coach/login")
     public ResponseEntity<Map<String, Object>> coachLogin(@RequestBody Map<String, Object> body) {
-        // Login must stay lightweight: seed/repair work is done during startup and normal data APIs.
-        // Running the full operational repair here can block the login button when users switch roles repeatedly.
-        
+        store.ensureOperationalData();
         String username = store.str(body.get("username"), "");
         String password = store.str(body.get("password"), "");
         Map<String, Object> coach = store.coachByUsername(username);
@@ -366,60 +356,40 @@ public class ApiController {
         Long classId = store.asLong(body.get("classId"));
         Map<String, Object> c = classId == null ? null : store.classById(classId);
         if (c == null) return fail("课程不存在");
-        int capacity = store.asInt(c.get("capacity"), 20);
-        Map<String, Object> booking;
-        int confirmedAfterAdd = 0;
         synchronized (store.bookings) {
             for (Map<String, Object> b : store.bookings) {
-                boolean sameClass = Objects.equals(store.asLong(b.get("classId")), classId);
-                boolean confirmed = "CONFIRMED".equalsIgnoreCase(store.str(b.get("status"), "CONFIRMED"));
-                if (sameClass && confirmed) confirmedAfterAdd++;
-                if (username.equals(b.get("username")) && sameClass && confirmed) {
+                if (username.equals(b.get("username")) && Objects.equals(store.asLong(b.get("classId")), classId)
+                        && "CONFIRMED".equalsIgnoreCase(store.str(b.get("status"), "CONFIRMED"))) {
                     return fail("你已经预约过该课程");
                 }
             }
-            boolean isPrivateClass = "PRIVATE".equalsIgnoreCase(store.str(c.get("type"), "")) || store.str(c.get("location"), "").contains("私教") || store.str(c.get("name"), "").contains("私教");
-            if (capacity > 0 && confirmedAfterAdd >= capacity) {
-                if (isPrivateClass) {
-                    capacity = Math.max(3, confirmedAfterAdd + 1);
-                    c.put("capacity", capacity);
-                } else {
-                    return fail("课程已满");
-                }
-            }
-            booking = store.m("id", store.nextId(), "username", username, "classId", classId, "status", "CONFIRMED", "bookingTime", LocalDateTime.now().toString());
+            int capacity = store.asInt(c.get("capacity"), 20);
+            int bookedCount = store.asInt(c.get("bookedCount"), 0);
+            if (capacity > 0 && bookedCount >= capacity) return fail("课程已满");
+            Map<String, Object> booking = store.m("id", store.nextId(), "username", username, "classId", classId, "status", "CONFIRMED", "bookingTime", LocalDateTime.now().toString());
             store.bookings.add(booking);
-            confirmedAfterAdd++;
+            c.put("bookedCount", bookedCount + 1);
+            store.saveToMysqlQuietly();
+            return ok(booking);
         }
-        c.put("bookedCount", confirmedAfterAdd);
-        store.saveToMysqlQuietly();
-        return ok(booking);
     }
 
     @PutMapping("/bookings/class/{classId}/cancel")
     public ResponseEntity<Map<String, Object>> cancelByClass(HttpServletRequest request, @PathVariable Long classId) {
         store.ensureOperationalData();
         String username = username(request);
-        Map<String, Object> cancelled = null;
-        int confirmedAfterCancel = 0;
         synchronized (store.bookings) {
             for (Map<String, Object> b : store.bookings) {
-                boolean sameClass = Objects.equals(store.asLong(b.get("classId")), classId);
-                boolean confirmed = "CONFIRMED".equalsIgnoreCase(store.str(b.get("status"), "CONFIRMED"));
-                if (username.equals(b.get("username")) && sameClass && confirmed) {
+                if (username.equals(b.get("username")) && Objects.equals(store.asLong(b.get("classId")), classId) && "CONFIRMED".equalsIgnoreCase(store.str(b.get("status"), "CONFIRMED"))) {
                     b.put("status", "CANCELLED");
-                    b.put("cancelTime", LocalDateTime.now().toString());
-                    cancelled = b;
-                    confirmed = false;
+                    Map<String, Object> c = store.classById(classId);
+                    if (c != null) c.put("bookedCount", Math.max(0, store.asInt(c.get("bookedCount"), 0) - 1));
+                    store.saveToMysqlQuietly();
+                    return ok(b);
                 }
-                if (sameClass && confirmed) confirmedAfterCancel++;
             }
         }
-        if (cancelled == null) return fail("未找到有效预约");
-        Map<String, Object> c = store.classById(classId);
-        if (c != null) c.put("bookedCount", Math.max(0, confirmedAfterCancel));
-        store.saveToMysqlQuietly();
-        return ok(cancelled);
+        return fail("未找到有效预约");
     }
 
     @GetMapping("/trainers")
@@ -633,7 +603,6 @@ public class ApiController {
                 "createdByCurrentUser", true,
                 "memberUsernames", new ArrayList<String>(Arrays.asList(creator)));
         store.teams.add(0, team);
-        store.saveToMysqlQuietly();
         return ok(team);
     }
 
@@ -657,7 +626,6 @@ public class ApiController {
                 t.put("members", currentMembers);
                 t.put("maxMembers", maxMembers);
                 t.put("capacity", maxMembers);
-                store.saveToMysqlQuietly();
                 return ok(teamView(t, current));
             }
         }
@@ -680,7 +648,6 @@ public class ApiController {
                 t.put("members", currentMembers);
                 t.put("maxMembers", maxMembers);
                 t.put("capacity", maxMembers);
-                store.saveToMysqlQuietly();
                 return ok(teamView(t, current));
             }
         }
@@ -693,14 +660,7 @@ public class ApiController {
         String current = username(request);
         List<Map<String, Object>> out = new ArrayList<Map<String, Object>>();
         synchronized (store.posts) {
-            for (Map<String, Object> p : store.posts) {
-                // Admin can still see all posts, but the member activity feed
-                // should only show posts that are visible. Older seed data has
-                // no visible field, so it is treated as visible by default.
-                Object visible = p.get("visible");
-                if (visible instanceof Boolean && !((Boolean) visible)) continue;
-                out.add(postView(p, current));
-            }
+            for (Map<String, Object> p : store.posts) out.add(postView(p, current));
         }
         return ok(out);
     }
@@ -709,11 +669,10 @@ public class ApiController {
     public ResponseEntity<Map<String, Object>> createPost(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Map<String, Object> user = store.userByUsername(username(request));
         Long id = store.nextId();
-        Map<String, Object> post = store.m("id", id, "author", user == null ? username(request) : user.get("name"), "username", username(request), "category", store.str(body.get("category"), "share"), "content", store.str(body.get("content"), "新的健身动态"), "likes", 0, "comments", 0, "liked", false, "likedBy", new ArrayList<String>(), "visible", true, "createdAt", LocalDateTime.now().toString());
+        Map<String, Object> post = store.m("id", id, "author", user == null ? username(request) : user.get("name"), "username", username(request), "category", store.str(body.get("category"), "分享"), "content", store.str(body.get("content"), "新的健身动态"), "likes", 0, "comments", 0, "liked", false, "likedBy", new ArrayList<String>(), "createdAt", LocalDateTime.now().toString());
         store.posts.add(0, post);
         store.postComments.put(id, Collections.synchronizedList(new ArrayList<Map<String, Object>>()));
-        store.saveToMysqlQuietly();
-        return ok(postView(post, username(request)));
+        return ok(post);
     }
 
     @PostMapping("/posts/{id}/like")
@@ -730,7 +689,6 @@ public class ApiController {
                 p.put("likes", likes);
                 p.put("liked", !alreadyLiked);
                 if (!alreadyLiked) store.points.put(current, store.points.getOrDefault(current, 0) + 2);
-                store.saveToMysqlQuietly();
                 Map<String, Object> data = postView(p, current);
                 Map<String, Object> out = store.ok(data);
                 out.put("likes", likes);
@@ -745,7 +703,6 @@ public class ApiController {
     public ResponseEntity<Map<String, Object>> report(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
         Map<String, Object> r = store.m("id", store.nextId(), "postId", id, "reason", store.str(body.get("reason"), "用户举报"), "status", "PENDING", "reporter", username(request));
         store.reports.add(0, r);
-        store.saveToMysqlQuietly();
         return ok(r);
     }
 
@@ -775,13 +732,12 @@ public class ApiController {
         if (!p.containsKey("stockQuantity")) p.put("stockQuantity", 10);
         if (!p.containsKey("imageKey")) p.put("imageKey", "equipment");
         store.products.add(0, p);
-        store.saveToMysqlQuietly();
         return ok(p);
     }
 
     @PutMapping("/products/{id}")
     public ResponseEntity<Map<String, Object>> editProduct(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        for (Map<String, Object> p : store.products) if (Objects.equals(store.asLong(p.get("id")), id)) { p.putAll(body); p.put("id", id); store.saveToMysqlQuietly(); return ok(p); }
+        for (Map<String, Object> p : store.products) if (Objects.equals(store.asLong(p.get("id")), id)) { p.putAll(body); p.put("id", id); return ok(p); }
         return fail("商品不存在");
     }
 
@@ -801,13 +757,12 @@ public class ApiController {
         user.put("id", store.nextId()); user.put("username", username); user.put("role", store.str(user.get("role"), "USER")); user.put("active", !Boolean.FALSE.equals(user.get("active"))); user.put("avatar", "avatar2");
         store.users.add(0, user); store.points.put(username, store.points.getOrDefault(username, 500));
         syncUserMembership(user, body);
-        store.saveToMysqlQuietly();
         return ok(adminUserRow(user));
     }
 
     @PutMapping("/users/{id}")
     public ResponseEntity<Map<String, Object>> editUser(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        for (Map<String, Object> u : store.users) if (Objects.equals(store.asLong(u.get("id")), id)) { u.putAll(body); u.put("id", id); syncUserMembership(u, body); store.saveToMysqlQuietly(); return ok(adminUserRow(u)); }
+        for (Map<String, Object> u : store.users) if (Objects.equals(store.asLong(u.get("id")), id)) { u.putAll(body); u.put("id", id); syncUserMembership(u, body); return ok(adminUserRow(u)); }
         return fail("用户不存在");
     }
 
@@ -819,7 +774,6 @@ public class ApiController {
             if (Objects.equals(store.asLong(u.get("id")), id)) {
                 String uname = store.str(u.get("username"), "");
                 it.remove(); store.memberships.remove(uname); store.points.remove(uname);
-                store.saveToMysqlQuietly();
                 return ok(store.m("deleted", true));
             }
         }
@@ -889,10 +843,10 @@ public class ApiController {
         }
         return ok(out);
     }
-    @PostMapping("/admin/reports/{id}/process") public ResponseEntity<Map<String, Object>> processReport(@PathVariable Long id) { for (Map<String, Object> r : store.reports) if (Objects.equals(store.asLong(r.get("id")), id)) r.put("status", "PROCESSED"); store.saveToMysqlQuietly(); return ok(store.reports); }
-    @PostMapping("/admin/reports/{id}/ignore") public ResponseEntity<Map<String, Object>> ignoreReport(@PathVariable Long id) { for (Map<String, Object> r : store.reports) if (Objects.equals(store.asLong(r.get("id")), id)) r.put("status", "IGNORED"); store.saveToMysqlQuietly(); return ok(store.reports); }
+    @PostMapping("/admin/reports/{id}/process") public ResponseEntity<Map<String, Object>> processReport(@PathVariable Long id) { for (Map<String, Object> r : store.reports) if (Objects.equals(store.asLong(r.get("id")), id)) r.put("status", "PROCESSED"); return ok(store.reports); }
+    @PostMapping("/admin/reports/{id}/ignore") public ResponseEntity<Map<String, Object>> ignoreReport(@PathVariable Long id) { for (Map<String, Object> r : store.reports) if (Objects.equals(store.asLong(r.get("id")), id)) r.put("status", "IGNORED"); return ok(store.reports); }
     @GetMapping("/admin/posts") public ResponseEntity<Map<String, Object>> adminPosts() { store.ensureOperationalData(); return ok(store.posts); }
-    @DeleteMapping("/admin/posts/{id}") public ResponseEntity<Map<String, Object>> adminDeletePost(@PathVariable Long id) { Iterator<Map<String, Object>> it = store.posts.iterator(); while (it.hasNext()) if (Objects.equals(store.asLong(it.next().get("id")), id)) { it.remove(); store.saveToMysqlQuietly(); return ok(store.m("deleted", true)); } return fail("帖子不存在"); }
+    @DeleteMapping("/admin/posts/{id}") public ResponseEntity<Map<String, Object>> adminDeletePost(@PathVariable Long id) { Iterator<Map<String, Object>> it = store.posts.iterator(); while (it.hasNext()) if (Objects.equals(store.asLong(it.next().get("id")), id)) { it.remove(); return ok(store.m("deleted", true)); } return fail("帖子不存在"); }
 
     @GetMapping("/admin/coaches") public ResponseEntity<Map<String, Object>> adminCoaches() { store.ensureOperationalData(); return ok(store.coaches); }
 
@@ -1080,7 +1034,7 @@ public class ApiController {
 
     @PutMapping("/admin/posts/{id}")
     public ResponseEntity<Map<String, Object>> adminUpdatePost(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        for (Map<String, Object> p : store.posts) if (Objects.equals(store.asLong(p.get("id")), id)) { p.putAll(body); p.put("id", id); store.saveToMysqlQuietly(); return ok(p); }
+        for (Map<String, Object> p : store.posts) if (Objects.equals(store.asLong(p.get("id")), id)) { p.putAll(body); p.put("id", id); return ok(p); }
         return fail("帖子不存在");
     }
 
@@ -1106,7 +1060,6 @@ public class ApiController {
             p.put("comments", comments);
             break;
         }
-        store.saveToMysqlQuietly();
         Map<String, Object> out = store.ok(comment);
         out.put("comments", comments);
         return ResponseEntity.ok(out);

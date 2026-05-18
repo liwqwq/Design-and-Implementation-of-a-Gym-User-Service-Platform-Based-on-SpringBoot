@@ -499,12 +499,3 @@ body:has(.ft-user-head){
   box-shadow:none!important;
   filter:saturate(.85);
 }
-
-/* v55: make private-class full status explicit instead of looking clickable */
-.cbook-private-list button.full,
-.cbook-private-list button:disabled.full{
-  background:#cbd5e1!important;
-  color:#64748b!important;
-  cursor:not-allowed!important;
-  box-shadow:none!important;
-}
